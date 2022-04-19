@@ -1,0 +1,26 @@
+name: "CodeQL"
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        # We must fetch at least the immediate parents so that if this is
+        # a pull request then we can checkout the head.
+        fetch-depth: 2
+
+    # Initializes the CodeQL tools for scanning.
+    - name: ⏳ Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: "python"
+
+    - name: 🔬 Analyze code
+      uses: github/codeql-action/analyze@v1
