@@ -41,7 +41,7 @@ jobs:
 
   test-legacy:
     name: Test with older dependencies
-    needs: test-current
+    needs: test-stable
     runs-on: ubuntu-latest
     env:
       DJANGO_SETTINGS_MODULE: querystring_tag.testapp.settings
