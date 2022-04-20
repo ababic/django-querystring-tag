@@ -14,7 +14,12 @@ class Operator(TextChoices):
 class ParamModifierExpression:
     operator = None
 
-    def __init__(self, param_name: FilterExpression, value: FilterExpression, model_value_field: str = "pk"):
+    def __init__(
+        self,
+        param_name: FilterExpression,
+        value: FilterExpression,
+        model_value_field: str = "pk",
+    ):
         self.param_name = param_name
         self.resolved_param_name = None
         self.value = value
@@ -25,9 +30,7 @@ class ParamModifierExpression:
         self.resolved_param_name = self._resolve_expression(
             self.param_name, context, ignore_failures
         )
-        value = self._resolve_expression(
-            self.value, context, ignore_failures
-        )
+        value = self._resolve_expression(self.value, context, ignore_failures)
 
         if value is None:
             self.resolved_value = None
@@ -35,7 +38,9 @@ class ParamModifierExpression:
 
         # Normalize value to a lists of strings
         if hasattr(value, "__iter__") and not isinstance(value, (str, bytes)):
-            self.resolved_value = [normalize_value(v, self.model_value_field) for v in value]
+            self.resolved_value = [
+                normalize_value(v, self.model_value_field) for v in value
+            ]
         else:
             self.resolved_value = [normalize_value(value)]
 
@@ -52,7 +57,7 @@ class ParamModifierExpression:
         try:
             value.resolve(context)
         except VariableDoesNotExist:
-            if "." not in token and '|' not in token:
+            if "." not in token and "|" not in token:
                 # Interpret as an unquoted string
                 return stripped
             if ignore_failures:

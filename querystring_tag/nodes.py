@@ -63,7 +63,9 @@ class QuerystringNode(Node):
                 del querydict[key]
 
     @staticmethod
-    def clean_querydict(querydict: QueryDict, remove_blank: bool = True, remove_utm: bool = True) -> None:
+    def clean_querydict(
+        querydict: QueryDict, remove_blank: bool = True, remove_utm: bool = True
+    ) -> None:
         values_to_remove = {None}
         if remove_blank:
             values_to_remove.add("")
