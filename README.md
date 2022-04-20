@@ -79,7 +79,7 @@ Values can be strings, booleans, integers, dates, datetimes, Django model instan
 
 When encountering a Django model instance as a value, `{% querystring %}` will automatically take the `pk` value from the instance to use in the querystring.
 
-##### Specifying multiple values
+#### Specifying multiple values
 
 As mentioned above, you can provide an iterable as a value to specify multiple values for a parameter at once. That could be a native Python type, such as a `list`, `tuple` or `set`, but could also be anything that implements the `__iter__` method to support iteration, for example, a `QuerySet`.
 
@@ -100,6 +100,55 @@ The output of the above would be:
 
 ## Options reference
 
+#### `source_data`
+
+**Supported value types**: `QueryDict`, `dict`, `str`
+
+**Default value**: `request.GET`
+
+The tag defaults to using ``request.GET`` as the data source for the querystring, but the `source_data` keyword argument can be used to specify use an alternative ``QueryDict``, ``dict`` or string value.
+
+For example, say you were using a Django form to validate query data, and only want valid data to be included. You could use the Form's `cleaned_data` to generate a querystring instead:
+
+```
+{% load querystring_tag %}
+{% querystring source_data=form.cleaned_data page=2 %}
+```
+
+#### `remove_blank`
+
+**Supported value types**: `bool`
+
+**Default value**: `True`
+
+Any parameter values with a value of `None` or `""` (an empty string) are removed from the querystring default.
+
+To retain blank values, include `remove_blank=False` in your `{% querystring %}` tag.
+
+#### `remove_utm`
+
+**Supported value types**: `bool`
+
+**Default value**: `True`
+
+Parameter names starting with `"utm_"` (the format used for Google Analytics tracking parameters) are exluded from the generated querystrings by default, as it's unlikley that you'll want these to be repeated in links to other pages.
+
+To retain these parameters instead, include `remove_utm=False` in your `{% querystring %}` tag.
+
+#### `model_value_field`
+
+**Supported value types**: `str`
+
+**Default value**: `"pk"`
+
+By default, when encountering a Django model instance as a value, `{% querystring %}` will take the `pk` value from the instance to use in the querystring. If you'd like to use a different field value, you can use the `model_value_field` option to specify an alternative field.
+
+For example, if the model had a `slug` field that you were using as the public-facing identifier, you could specify that `slug` values be used in the querystring, like so:
+
+```
+{% querystring tags=tag_queryset model_field_value='slug' %}
+```
+
 #### `only`
 
 Use this option at the start of your `{% querystring %}` tag when you only want the querystring to include values for specific parameters.
@@ -114,7 +163,7 @@ And you wanted to render a querystring containing only the `q` and `group` param
 
 ```
 {% load querystring_tag %}
-{% querystring only q group %}
+{% querystring only 'q' 'group' %}
 ```
 
 The resulting string would be:
@@ -122,6 +171,8 @@ The resulting string would be:
 ```
 ?q=keywords&group=articles
 ```
+
+NOTE: `only` is compatible with every other option except for `discard`. It can even be combined with any number of modifying keyword arguments; Just remember to keep the `only` keyword and related field names as the left-most parameters.
 
 #### `discard`
 
@@ -133,50 +184,11 @@ For example, say the current querystring looked like this:
 ?q=keywords&group=articles&category=2&published_after=2022-01-01
 ```
 
-And you wanted to keep everything but `published_after` in the rendered querystring. You could use `discard` to achieve this:
+And you wanted to preserve everything except for `group` `published_after` in the rendered querystring. You could use `discard` to achieve this:
 
 ```
 {% load querystring_tag %}
-{% querystring discard published_after %}
+{% querystring discard 'group' 'published_after' %}
 ```
 
-#### `source_data` (`QueryDict`, `dict` or `str`)
-
-**Default value: `request.GET`**
-
-The tag defaults to using ``request.GET`` as the data source for the querystring, but the `source_data` keyword argument can be used to specify use an alternative ``QueryDict``, ``dict`` or string value.
-
-For example, say you were using a Django form to validate query data, and only want valid data to be included. You could use the Form's `cleaned_data` to generate a querystring instead:
-
-```
-{% load querystring_tag %}
-{% querystring source_data=form.cleaned_data page=2 %}
-```
-
-#### `remove_blank` (`bool`)
-
-**Default value: `True`**
-
-Any parameter values with a value of `None` or `""` (an empty string) are removed from the querystring default.
-
-To retain blank values, include `remove_blank=False` in your `{% querystring %}` tag.
-
-#### `remove_utm` (`bool`)
-
-**Default value: `True`**
-
-Parameter names starting with `"utm_"` (the format used for Google Analytics tracking parameters) are exluded from the generated querystrings by default, as it's unlikley that you'll want these to be repeated in links to other pages.
-
-To retain these parameters instead, include `remove_utm=False` in your `{% querystring %}` tag.
-
-#### `model_value_field` (`str`)
-
-**Default value: `"pk"`**
-
-By default, when encountering a Django model instance as a value, `{% querystring %}` will take the `pk` value from the instance to use in the querystring. If you'd like to use a different field value, you can use the `model_value_field` option to specify an alternative field.
-
-For example, if the model had a `slug` field that you were using as the public-facing identifier, you could specify that `slug` values be used in the querystring, like so:
-
-```
-{% querystring tags=tag_queryset model_field_value='slug' %}
-```
+NOTE: `discard` is compatible with every other option except for `only`. It can even be combined with any number of modifying keyword arguments; Just remember to keep the `discard` keyword and related field names as the left-most parameters.

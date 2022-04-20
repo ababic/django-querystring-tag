@@ -5,7 +5,7 @@ from django.http.request import QueryDict
 from django.template.base import FilterExpression, VariableDoesNotExist
 
 
-from .utils import get_value_list
+from .utils import normalize_value
 
 
 class Operator(TextChoices):
@@ -17,36 +17,50 @@ class Operator(TextChoices):
 class ParamModifierExpression:
     operator = None
 
-    def __init__(self, param_name: FilterExpression, value: FilterExpression):
+    def __init__(self, param_name: FilterExpression, value: FilterExpression, model_value_field: str = "pk"):
         self.param_name = param_name
         self.resolved_param_name = None
         self.value = value
         self.resolved_value = None
+        self.model_value_field = model_value_field
+
+    def resolve(self, context, ignore_failures: bool = False) -> None:
+        self.resolved_param_name = self._resolve_expression(
+            self.param_name, context, ignore_failures
+        )
+        value = self._resolve_expression(
+            self.value, context, ignore_failures
+        )
+
+        if value is None:
+            self.resolved_value = None
+            return
+
+        # Normalize value to a lists of strings
+        if hasattr(value, "__iter__") and not isinstance(value, (str, bytes)):
+            self.resolved_value = [normalize_value(v, self.model_value_field) for v in value]
+        else:
+            self.resolved_value = [normalize_value(value)]
 
     def _resolve_expression(value, context, ignore_failures=False):
         if value is None or isinstance(value, str):
             return value
 
         token = value.token
-        if token.startswith("'") and "|" not in token:
-            return token.strip("'")
-        if token.startswith('"') and "|" not in token:
-            return token.strip('"')
+        stripped = token.strip("'" + '"')
+        if len(token) - len(stripped) == 2:
+            # Assume this was a quoted string and return it unquoted
+            return stripped
 
         try:
             value.resolve(context)
         except VariableDoesNotExist:
+            if "." not in token and '|' not in token:
+                # Interpret as an unquoted string
+                return stripped
             if ignore_failures:
                 return None
             raise
-
-    def resolve(self, context, ignore_failures: bool = False) -> None:
-        self.resolved_param_name = self._resolve_expression(
-            self.param_name, context, ignore_failures
-        )
-        self.resolved_value = self._resolve_expression(
-            self.value, context, ignore_failures
-        )
 
     def apply(self, querydict: QueryDict) -> None:
         raise NotImplementedError
@@ -58,7 +72,7 @@ class AddValueExpression(ParamModifierExpression):
     def apply(self, querydict: QueryDict) -> None:
         param_name = self.resolved_param_name
         current_values = set(querydict.get_list(param_name, ()))
-        for val in get_value_list(self.resolved_value):
+        for val in self.resolved_value:
             if val not in current_values:
                 querydict.appendlist(param_name, val)
 
@@ -69,9 +83,8 @@ class RemoveValueExpression(ParamModifierExpression):
     def apply(self, querydict: QueryDict) -> None:
         param_name = self.resolved_param_name
         current_values = set(querydict.get_list(param_name, ()))
-        values_to_remove = get_value_list(self.resolved_value)
         querydict.setlist(
-            param_name, [v for v in current_values if v not in values_to_remove]
+            param_name, [v for v in current_values if v not in self.resolved_value]
         )
 
 
@@ -86,7 +99,7 @@ class SetValueExpression(ParamModifierExpression):
             except KeyError:
                 pass
         else:
-            querydict.setlist(param_name, get_value_list(self.resolved_value))
+            querydict.setlist(param_name, self.resolved_value)
 
 
 PARAM_MODIFIER_EXPRESSIONS = {

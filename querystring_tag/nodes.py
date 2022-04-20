@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.http.request import QueryDict
-from django.template.base import FilterExpression, Node, VariableDoesNotExist
+from django.template.base import FilterExpression, Node
 from django.utils.safestring import mark_safe
 
 if TYPE_CHECKING:
@@ -13,25 +13,29 @@ class QuerystringNode(Node):
         *,
         source_data: Optional[Union[str, Dict[str, Any], QueryDict]] = None,
         only: Optional[List[FilterExpression]] = None,
-        remove: Optional[List[FilterExpression]] = None,
+        discard: Optional[List[FilterExpression]] = None,
         param_modifiers: Optional[List[ParamModifierExpression]] = None,
         remove_blank: Union[bool, FilterExpression] = True,
         remove_utm: Union[bool, FilterExpression] = True,
         target_var: Optional[str] = None,
     ):
         self.source_data = source_data
+        # parameters for the 'only' or 'discard' options
         self.only = only or ()
-        self.remove = remove or ()
+        self.discard = discard or ()
+        # modifiers
         self.param_modifiers = param_modifiers
+        # other options
         self.remove_blank = remove_blank
         self.remove_utm = remove_utm
+        # Set when 'as' is used to variabalize the value
         self.target_var = target_var
 
     def get_resolved_arguments(self, context):
         only = [var.resolve(context) for var in self.only]
-        remove = [var.resolve(context) for var in self.remove]
+        discard = [var.resolve(context) for var in self.discard]
         param_modifiers = [(item.resolve(context)) for item in self.param_modifiers]
-        return only, remove, param_modifiers
+        return only, discard, param_modifiers
 
     def get_base_querydict(self, context):
         if self.source_data is None:
@@ -76,20 +80,20 @@ class QuerystringNode(Node):
 
     def get_querydict(self, context) -> QueryDict:
         querydict = self.get_base_querydict(context)
-        only, remove, param_modifiers = self.get_resolved_arguments(context)
+        only, discard, param_modifiers = self.get_resolved_arguments(context)
 
         remove_keys = None
         if only:
             remove_keys = (k for k in querydict.keys() if k not in only)
-        elif remove:
-            remove_keys = remove
+        elif discard:
+            remove_keys = discard
         for key in remove_keys:
             try:
                 del querydict[key]
             except KeyError:
                 pass
 
-        # Modify according to supplied arguments
+        # Modify according to supplied kwargs
         for item in param_modifiers:
             item.apply(querydict)
 

@@ -74,95 +74,16 @@ def extract_kwarg_groups(
 
 @register.tag()
 def querystring(parser, token):
-    """
-    Renders a URL and IRI encoded querystring (e.g. "q=Hello%20World&amp;category=1") that is safe to include in links.
-    The querystring for the current request (``request.GET``) is used as a base by default, or an alternative
-    ``QueryDict``, ``dict`` or querystring value can be provided as the first argument. The base value can be modified
-    by providing any number of additional key/value pairs. ``None`` values are discounted automatically, and blank
-    values can be optionally discounted by specifying ``remove_blank=True``.
-
-    When specifying key/value pairs, any keys that do not already exist in the base value will be added, and those
-    that do will have their value replaced. Specifying a value of ``None`` for an existing item will result in it being
-    discounted. For example, if the querystring for the current request were "foo=ORIGINALFOOVAL&bar=ORIGINALBARVAL",
-    but you wanted to:
-
-    * Change the value of "foo" to "NEWFOOVAL"
-    * Remove "bar"
-    * Add a new "baz" item with the value `1`
-
-    You could do so using the following:
-
-    .. code::
-        {% load querystring_tag %}
-        {% querystring foo="NEWFOOVAL" bar=None baz=1 %}```
-
-    The output of the above would be "?foo=NEWFOOVAL&amp;baz=1".
-
-    Values can be strings, booleans, integers, dates, datetimes, model
-    instances, and both values AND keys can be template variables.
-
-    For example, if the tag was being used to generate pagination links, and
-    ``page_param_name`` and ``page_num`` were variables available in the
-    template, you could use them both like so:
-
-    .. code::
-        {% load querystring_tag %}
-        {% querystring page_param_name=page_num %}
-
-    You can specify more than one value for a key by providing an iterable as a value. For example, if the context
-    contained a variable ``tag_list``, which was list of 'tag' values (```['tag1', 'tag2', 'tag3']```), you include all
-    of those values by referencing the list value. For example:
-
-    .. code::
-        {% load querystring_tag %}
-        {% querystring tags=tag_list %}
-
-    The output of the above would be "?tags=tag1&amp;tags=tag2&amp;tags=tag3" (plus whatever other values were in the
-    base value).
-
-    And finally, if you want to modify the existing parameter value(s) instead of replacing
-    them completely, you can use the '+=' operator to add values, or '-=' to
-    remove them.
-
-    For example, if the querystring was "tags=tag1&amp;tags=tag2&amp;tags=tag3", and you wanted to remove 'tag2', you
-    could do:
-
-    .. core::
-        {% load querystring_tag %}
-        {% querystring tags-='tag2' %}
-
-    Which would output: "?tags=tag1&amp;tags=tag3"
-
-    Or, if you wanted to add a new 'tagNew' value to that same parameter, you could do:
-
-    .. code::
-        {% load querystring_tag %}
-        {% querystring tags+='tagNew' %}
-
-    Which would output: "?tags=tag1&amp;tags=tag2&amp;tags=tag3&amp;tags=tagNew"
-
-    You can add as many modifiers to the same tag as you need to, with any
-    combination of modifiers at once. For example, the following is perfectly valid:
-
-    .. code::
-        {% load querystring_tag %}
-        {% querystring page=None tags+="newTag" tags-="oldTag" %}
-
-    Modifiers always fail gracefully if the value you're trying to add is already
-    present, or a value you're trying to remove is not, or the named parameter isn't
-    present at all.
-    """
-
     bits = token.split_contents()
     only = None
-    remove = None
+    discard = None
 
-    if bits[1] in ("only", "remove"):
+    if bits[1] in ("only", "discard"):
         params = extract_param_names(parser, bits[2:])
         if bits[1] == "only":
             only = params
         else:
-            remove = params
+            discard = params
         bits = bits[len(params) + 2 :]
 
     target_var = None
@@ -173,6 +94,7 @@ def querystring(parser, token):
     remove_blank = True
     remove_utm = True
     source_data = None
+    model_value_field = "pk"
     param_modifiers = []
 
     for group in extract_kwarg_groups(parser, bits):
@@ -182,14 +104,19 @@ def querystring(parser, token):
             remove_utm = group[2]
         elif group[0] == "source_data":
             source_data = group[2]
+        elif group[0] == "model_value_field":
+            model_value_field = group[2]
         else:
+            # Identify class based on the operator ('=' | '-=' | '+=')
             klass = PARAM_MODIFIER_EXPRESSIONS.get(group[1])
-            param_modifiers.append(klass(group[0], group[2]))
+            # Initialize ParamModifierExpression object
+            obj = klass(group[0], group[2], model_value_field)
+            param_modifiers.append(obj)
 
     return QuerystringNode(
         source_data=source_data,
         only=only,
-        remove=remove,
+        discard=discard,
         remove_blank=remove_blank,
         remove_utm=remove_utm,
         param_modifiers=param_modifiers,
