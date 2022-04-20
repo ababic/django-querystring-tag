@@ -2,7 +2,6 @@ from django.db.models import TextChoices
 from django.http.request import QueryDict
 from django.template.base import FilterExpression, VariableDoesNotExist
 
-
 from .utils import normalize_value
 
 
