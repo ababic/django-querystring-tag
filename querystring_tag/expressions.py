@@ -1,5 +1,3 @@
-from typing import Any, Dict, Iterable, Optional, Sequence, Tuple, Union
-
 from django.db.models import TextChoices
 from django.http.request import QueryDict
 from django.template.base import FilterExpression, VariableDoesNotExist
@@ -91,7 +89,7 @@ class RemoveValueExpression(ParamModifierExpression):
 class SetValueExpression(ParamModifierExpression):
     operator = Operator.SET
 
-    def apply_to(self, querydict: QueryDict) -> None:
+    def apply(self, querydict: QueryDict) -> None:
         param_name = self.resolved_param_name
         if self.resolved_value is None:
             try:

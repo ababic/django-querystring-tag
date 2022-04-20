@@ -7,6 +7,7 @@ from django.utils.safestring import mark_safe
 if TYPE_CHECKING:
     from .expressions import ParamModifierExpression
 
+
 class QuerystringNode(Node):
     def __init__(
         self,

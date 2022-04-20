@@ -84,7 +84,8 @@ def querystring(parser, token):
             only = params
         else:
             discard = params
-        bits = bits[len(params) + 2 :]
+        start_index = len(params) + 2
+        bits = bits[start_index:]
 
     target_var = None
     if len(bits >= 2) and bits[-2] == "as":
