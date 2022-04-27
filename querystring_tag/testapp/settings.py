@@ -32,7 +32,8 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.request",
             ],
-            "builtins": ["pattern_library.loader_tags"],
+            # Adding tag to built-ins so that it doesn't need importing in test templates
+            "builtins": ["querystring_tag.templatetags.querystring_tag"],
         },
     }
 ]

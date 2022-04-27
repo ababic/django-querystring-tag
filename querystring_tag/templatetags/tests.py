@@ -8,9 +8,7 @@ request_factory = RequestFactory()
 
 class TestTagOptionInterpretation(SimpleTestCase):
     def render_tag(self, tag_options: str) -> MagicMock:
-        template = Template(
-            "{% load querystring_tag %}{% querystring " + tag_options + " %}"
-        )
+        template = Template("{% querystring " + tag_options + " %}")
 
         request = request_factory.get(
             "/", data={"foo": ["a", "b", "c"], "bar": [1, 2, 3], "baz": "single-value"}
