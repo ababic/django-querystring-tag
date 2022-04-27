@@ -44,6 +44,7 @@ class ParamModifierExpression:
         else:
             self.resolved_value = [normalize_value(value)]
 
+    @staticmethod
     def _resolve_expression(value, context, ignore_failures=False):
         if value is None or isinstance(value, str):
             return value
