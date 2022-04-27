@@ -3,6 +3,8 @@ from unittest.mock import MagicMock, patch
 from django.template import Context, Template
 from django.test import RequestFactory, SimpleTestCase
 
+import querystring_tag.nodes
+
 request_factory = RequestFactory()
 
 
@@ -30,9 +32,8 @@ class TestTagOptionInterpretation(SimpleTestCase):
             "letter_d": "c",
         }
 
-        with patch(
-            "querystring_tag.templatetags.querystring_tag.QuerystringNode.__init__",
-            return_value="",
+        with patch.object(
+            querystring_tag.nodes.QuerystringNode, "__init__"
         ) as mocked_init:
             template.render(Context(context_data))
             return mocked_init
