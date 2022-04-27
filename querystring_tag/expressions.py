@@ -27,11 +27,11 @@ class ParamModifierExpression:
         self.model_value_field = model_value_field
 
     def resolve(self, context, ignore_failures: bool = False) -> None:
-        self.resolved_param_name = self._resolve_expression(
+        self.resolved_param_name = self.resolve_param_name(
             self.param_name, context, ignore_failures
         )
         print("resolved_param_name:", self.resolved_param_name)
-        value = self._resolve_expression(self.value, context, ignore_failures)
+        value = self.resolve_value(self.value, context, ignore_failures)
 
         if value is None:
             self.resolved_value = None
@@ -46,8 +46,29 @@ class ParamModifierExpression:
             self.resolved_value = [normalize_value(value)]
         print("resolved_value:", self.resolved_value)
 
-    @staticmethod
-    def _resolve_expression(value, context, ignore_failures=False):
+    @classmethod
+    def resolve_param_name(cls, value, context, ignore_failures: bool = False):
+        if isinstance(value, str):
+            return value
+
+        token = value.token
+        stripped = token.strip("'").strip('"')
+        if len(token) - len(stripped) == 2:
+            # Assume this was a quoted string and return it unquoted
+            return stripped
+
+        try:
+            return value.resolve(context) or token
+        except VariableDoesNotExist:
+            if "." not in token and "|" not in token:
+                # Interpret as an unquoted string
+                return token
+            if ignore_failures:
+                return None
+            raise
+
+    @classmethod
+    def resolve_value(cls, value, context, ignore_failures: bool = False):
         if value is None or isinstance(value, str):
             return value
 
@@ -58,14 +79,10 @@ class ParamModifierExpression:
             return stripped
 
         try:
-            resolved = value.resolve(context)
-            if resolved is None:
-                return stripped
-            return resolved
+            return value.resolve(context)
         except VariableDoesNotExist:
             if "." not in token and "|" not in token:
-                # Interpret as an unquoted string
-                return stripped
+                return token
             if ignore_failures:
                 return None
             raise
