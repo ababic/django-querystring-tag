@@ -35,8 +35,9 @@ class QuerystringNode(Node):
     def get_resolved_arguments(self, context):
         only = [var.resolve(context) for var in self.only]
         discard = [var.resolve(context) for var in self.discard]
-        param_modifiers = [(item.resolve(context)) for item in self.param_modifiers]
-        return only, discard, param_modifiers
+        for item in self.param_modifiers:
+            item.resolve(context)
+        return only, discard, self.param_modifiers
 
     def get_base_querydict(self, context):
         if self.source_data is None:
