@@ -88,7 +88,7 @@ def querystring(parser, token):
         bits = bits[start_index:]
 
     target_var = None
-    if len(bits >= 2) and bits[-2] == "as":
+    if len(bits) >= 2 and bits[-2] == "as":
         target_var = bits[-1]
         bits = bits[:-2]
 
