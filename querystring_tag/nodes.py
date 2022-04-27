@@ -71,7 +71,7 @@ class QuerystringNode(Node):
         if remove_blank:
             values_to_remove.add("")
 
-        for key, values in querydict.lists():
+        for key, values in tuple(querydict.lists()):
             if remove_utm and key.lower().startswith("utm_"):
                 del querydict[key]
                 continue
