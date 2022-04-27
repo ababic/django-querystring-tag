@@ -31,7 +31,7 @@ class TestQuerystringTag(SimpleTestCase):
             "letter_a": "a",
             "letter_b": "b",
             "letter_c": "c",
-            "letter_d": "c",
+            "letter_d": "d",
         }
         return template.render(Context(context_data))
 
