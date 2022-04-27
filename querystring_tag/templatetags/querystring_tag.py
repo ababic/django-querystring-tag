@@ -12,7 +12,9 @@ register = template.Library()
 
 # Regex pattern for recognising keyword arguments with '-=' and '+='
 # operators in addition to the usual '='
-KWARG_PATTERN = re.compile(r"(?P<key>\S+)(?P<operator>\-=|\+=|=)(?P<value>\S+)")
+KWARG_PATTERN = re.compile(
+    r"(?P<key>[^-+=\s]+)\s*(?P<operator>\-=|\+=|=)\s*(?P<value>\S+)"
+)
 
 
 def extract_param_names(parser, bits: List[str]) -> List[FilterExpression]:
