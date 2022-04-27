@@ -89,7 +89,7 @@ def querystring(parser, token):
             only = params
         else:
             discard = params
-        start_index = len(params) + 2
+        start_index = len(params) + 1
         bits = bits[start_index:]
 
     target_var = None
