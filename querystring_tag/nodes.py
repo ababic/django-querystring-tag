@@ -25,7 +25,7 @@ class QuerystringNode(Node):
         self.only = only or ()
         self.discard = discard or ()
         # modifiers
-        self.param_modifiers = param_modifiers
+        self.param_modifiers = param_modifiers or ()
         # other options
         self.remove_blank = remove_blank
         self.remove_utm = remove_utm
