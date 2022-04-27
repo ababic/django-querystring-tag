@@ -56,7 +56,7 @@ class ParamModifierExpression:
             return stripped
 
         try:
-            value.resolve(context)
+            return value.resolve(context)
         except VariableDoesNotExist:
             if "." not in token and "|" not in token:
                 # Interpret as an unquoted string
