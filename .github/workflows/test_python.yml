@@ -34,8 +34,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[test]
           pip install "Django>=4.0,<5.0"
-      - name: ✅ Check for missing migrations
-        run: django-admin makemigrations --check --noinput
       - name: 🧪 Run tests
         run: pytest --junitxml=junit/test-results.xml --cov=querystring_tag
 
