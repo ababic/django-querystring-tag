@@ -52,23 +52,21 @@ class ParamModifierExpression:
             return value
 
         token = value.token
-        print("token:", token)
         stripped = token.strip("'").strip('"')
-        print("stripped:", stripped)
         if len(token) - len(stripped) == 2:
             # Assume this was a quoted string and return it unquoted
             return stripped
 
         try:
-            print("attempting to resolve")
-            return value.resolve(context)
+            resolved = value.resolve(context)
+            if resolved is None:
+                return stripped
+            return resolved
         except VariableDoesNotExist:
-            print("failed to resolve:", value)
             if "." not in token and "|" not in token:
                 # Interpret as an unquoted string
                 return stripped
             if ignore_failures:
-                print("giving up")
                 return None
             raise
 
