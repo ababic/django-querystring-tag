@@ -85,11 +85,13 @@ class QuerystringNode(Node):
         querydict = self.get_base_querydict(context)
         only, discard, param_modifiers = self.get_resolved_arguments(context)
 
-        remove_keys = None
         if only:
             remove_keys = (k for k in querydict.keys() if k not in only)
         elif discard:
             remove_keys = discard
+        else:
+            remove_keys = ()
+
         for key in remove_keys:
             try:
                 del querydict[key]
