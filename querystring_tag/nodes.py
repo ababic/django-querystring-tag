@@ -15,7 +15,7 @@ class QuerystringNode(Node):
         source_data: Optional[Union[str, Dict[str, Any], QueryDict]] = None,
         only: Optional[List[FilterExpression]] = None,
         discard: Optional[List[FilterExpression]] = None,
-        param_modifiers: Optional[List[ParamModifierExpression]] = None,
+        param_modifiers: Optional[List["ParamModifierExpression"]] = None,
         remove_blank: Union[bool, FilterExpression] = True,
         remove_utm: Union[bool, FilterExpression] = True,
         target_var: Optional[str] = None,
