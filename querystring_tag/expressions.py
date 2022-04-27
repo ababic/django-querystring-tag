@@ -30,6 +30,7 @@ class ParamModifierExpression:
         self.resolved_param_name = self._resolve_expression(
             self.param_name, context, ignore_failures
         )
+        print("resolved_param_name:", self.resolved_param_name)
         value = self._resolve_expression(self.value, context, ignore_failures)
 
         if value is None:
@@ -43,6 +44,7 @@ class ParamModifierExpression:
             ]
         else:
             self.resolved_value = [normalize_value(value)]
+        print("resolved_value:", self.resolved_value)
 
     @staticmethod
     def _resolve_expression(value, context, ignore_failures=False):
@@ -50,18 +52,23 @@ class ParamModifierExpression:
             return value
 
         token = value.token
-        stripped = token.strip("'" + '"')
+        print("token:", token)
+        stripped = token.strip("'").strip('"')
+        print("stripped:", stripped)
         if len(token) - len(stripped) == 2:
             # Assume this was a quoted string and return it unquoted
             return stripped
 
         try:
+            print("attempting to resolve")
             return value.resolve(context)
         except VariableDoesNotExist:
+            print("failed to resolve:", value)
             if "." not in token and "|" not in token:
                 # Interpret as an unquoted string
                 return stripped
             if ignore_failures:
+                print("giving up")
                 return None
             raise
 
