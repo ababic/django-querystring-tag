@@ -78,9 +78,12 @@ def querystring(parser, token):
     only = None
     discard = None
 
-    if bits[1] in ("only", "discard"):
-        params = extract_param_names(parser, bits[2:])
-        if bits[1] == "only":
+    # the `querystring` string isn't needed for anything
+    bits.pop(0)
+
+    if bits[0] in ("only", "discard"):
+        params = extract_param_names(parser, bits[1:])
+        if bits[0] == "only":
             only = params
         else:
             discard = params
@@ -108,7 +111,6 @@ def querystring(parser, token):
         elif group[0] == "model_value_field":
             model_value_field = group[2]
         else:
-            print("group:", group)
             # Identify class based on the operator ('=' | '-=' | '+=')
             klass = PARAM_MODIFIER_EXPRESSIONS.get(group[1])
             # Initialize ParamModifierExpression object
