@@ -74,7 +74,7 @@ class AddValueExpression(ParamModifierExpression):
 
     def apply(self, querydict: QueryDict) -> None:
         param_name = self.resolved_param_name
-        current_values = set(querydict.get_list(param_name, ()))
+        current_values = set(querydict.getlist(param_name, ()))
         for val in self.resolved_value:
             if val not in current_values:
                 querydict.appendlist(param_name, val)
@@ -85,7 +85,7 @@ class RemoveValueExpression(ParamModifierExpression):
 
     def apply(self, querydict: QueryDict) -> None:
         param_name = self.resolved_param_name
-        current_values = set(querydict.get_list(param_name, ()))
+        current_values = set(querydict.getlist(param_name, ()))
         querydict.setlist(
             param_name, [v for v in current_values if v not in self.resolved_value]
         )
