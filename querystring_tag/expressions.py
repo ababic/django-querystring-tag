@@ -105,5 +105,5 @@ class SetValueExpression(ParamModifierExpression):
 
 
 PARAM_MODIFIER_EXPRESSIONS = {
-    klass.operator: klass for klass in ParamModifierExpression.__subclasses__
+    klass.operator: klass for klass in ParamModifierExpression.__subclasses__()
 }
