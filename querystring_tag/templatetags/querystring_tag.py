@@ -25,7 +25,7 @@ def extract_param_names(parser, bits: List[str]) -> List[FilterExpression]:
     for bit in bits:
         if bit == "as":
             return param_names
-        for operator in Operator.values():
+        for operator in Operator.values:
             if operator in bit:
                 return param_names
         param_names.append(parser.compile_filter(bit))
@@ -61,7 +61,7 @@ def extract_kwarg_groups(
             if current_group:
                 yield tuple(current_group)
             break
-        if bit in Operator.values():
+        if bit in Operator.values:
             key = current_group.pop()
             if current_group:
                 yield tuple(current_group)
