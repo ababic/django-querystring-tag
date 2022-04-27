@@ -72,7 +72,7 @@ class TestQuerystringTag(SimpleTestCase):
     def test_add_with_strings(self):
         result = self.render_tag("foo+='d'")
         self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&foo=d&bar=1&bar=2&bar=3&baz=single-value"
+            result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value"
         )
 
     def test_add_with_key_param(self):
