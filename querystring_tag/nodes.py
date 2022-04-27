@@ -41,7 +41,7 @@ class QuerystringNode(Node):
     def get_base_querydict(self, context):
         if self.source_data is None:
             if "request" in context:
-                return context["request"].GET.copy(mutable=True)
+                return context["request"].GET.copy()
             return QueryDict("", mutable=True)
         try:
             source_data = self.source_data.resolve(context)
