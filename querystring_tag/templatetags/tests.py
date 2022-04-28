@@ -41,13 +41,19 @@ class TestQuerystringTag(SimpleTestCase):
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=new"
         )
 
-    def test_add_param_with_key_param(self):
+    def test_add_param_with_unqouted_string(self):
+        result = self.render_tag("newparam=new")
+        self.assertEqual(
+            result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=new"
+        )
+
+    def test_add_param_with_key_variable_substitution(self):
         result = self.render_tag("new_param_name='new'")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=new"
         )
 
-    def test_add_param_with_value_param(self):
+    def test_add_param_with_value_variable_substitution(self):
         result = self.render_tag("newparam=two")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=2"
@@ -57,37 +63,47 @@ class TestQuerystringTag(SimpleTestCase):
         result = self.render_tag("foo='foo'")
         self.assertEqual(result, "?foo=foo&bar=1&bar=2&bar=3&baz=single-value")
 
-    def test_replace_with_key_param(self):
+    def test_replace_with_unqouted_string(self):
+        result = self.render_tag("foo=foo")
+        self.assertEqual(result, "?foo=foo&bar=1&bar=2&bar=3&baz=single-value")
+
+    def test_replace_with_key_variable_substitution(self):
         result = self.render_tag("foo_parm_name='foo'")
         self.assertEqual(result, "?foo=foo&bar=1&bar=2&bar=3&baz=single-value")
 
-    def test_replace_with_value_param(self):
+    def test_replace_with_value_variable_substitution(self):
         result = self.render_tag("foo=one")
         self.assertEqual(result, "?foo=1&bar=1&bar=2&bar=3&baz=single-value")
 
-    def test_replace_with_param_key_and_value(self):
+    def test_replace_with_key_and_value_variable_substitution(self):
         result = self.render_tag("foo_parm_name=one")
         self.assertEqual(result, "?foo=1&bar=1&bar=2&bar=3&baz=single-value")
 
-    def test_add_with_strings(self):
+    def test_add_with_string(self):
         result = self.render_tag("foo+='d'")
         self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value"
+            result, "?foo=a&foo=b&foo=c&foo=d&bar=1&bar=2&bar=3&baz=single-value"
         )
 
-    def test_add_with_key_param(self):
+    def test_add_with_unqouted_string(self):
+        result = self.render_tag("foo+=d")
+        self.assertEqual(
+            result, "?foo=a&foo=b&foo=c&foo=d&bar=1&bar=2&bar=3&baz=single-value"
+        )
+
+    def test_add_with_key_variable_substitution(self):
         result = self.render_tag("foo_parm_name+='d'")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&foo=d&bar=1&bar=2&bar=3&baz=single-value"
         )
 
-    def test_add_with_value_param(self):
+    def test_add_with_value_variable_substitution(self):
         result = self.render_tag("foo+=letter_d")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&foo=d&bar=1&bar=2&bar=3&baz=single-value"
         )
 
-    def test_add_with_param_key_and_value(self):
+    def test_add_with_key_and_value_variable_substitution(self):
         result = self.render_tag("foo_parm_name+=letter_d")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&foo=d&bar=1&bar=2&bar=3&baz=single-value"
@@ -125,21 +141,27 @@ class TestQuerystringTag(SimpleTestCase):
         result = self.render_tag(" ".join(options))
         self.assertEqual(result, "?bar=1&bar=2&bar=3&bar=4&bar=5")
 
-    def test_remove_with_strings(self):
+    def test_remove_with_string(self):
         result = self.render_tag("bar-='1'")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&foo=d&bar=2&bar=3&baz=single-value"
         )
 
-    def test_remove_with_key_param(self):
+    def test_remove_with_unqouted_string(self):
+        result = self.render_tag("foo-=a")
+        self.assertEqual(
+            result, "?foo=b&foo=c&foo=d&bar=1&bar=2&bar=3&baz=single-value"
+        )
+
+    def test_remove_with_key_variable_substitution(self):
         result = self.render_tag("bar_param_name-='1'")
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=2&bar=3&baz=single-value")
 
-    def test_remove_with_value_param(self):
+    def test_remove_with_value_variable_substitution(self):
         result = self.render_tag("bar-=one")
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=2&bar=3&baz=single-value")
 
-    def test_remove_with_param_key_and_value(self):
+    def test_remove_with_key_and_value_variable_substitution(self):
         result = self.render_tag("bar_param_name-=three")
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=1&bar=2&baz=single-value")
 
