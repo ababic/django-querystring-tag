@@ -78,7 +78,7 @@ class QuerystringNode(Node):
 
             cleaned_values = [v for v in values if v not in values_to_remove]
             if cleaned_values:
-                querydict.setlist(key, cleaned_values)
+                querydict.setlist(key, sorted(cleaned_values))
             else:
                 del querydict[key]
 
