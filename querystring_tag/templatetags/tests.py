@@ -93,6 +93,38 @@ class TestQuerystringTag(SimpleTestCase):
             result, "?foo=a&foo=b&foo=c&foo=d&bar=1&bar=2&bar=3&baz=single-value"
         )
 
+    def test_add_with_mixed_option_spacing(self):
+        options = [
+            # Do not use request.GET
+            "source='?'"
+            # add '1' to 'bar' (consistant whitespace)
+            "bar += 1",
+            # add '2' to 'bar' (no whitespace)
+            "bar+='2'",
+            # add '3' to 'bar' (whitespace on right side of operator only)
+            "bar-= 3",
+            # add '4' to 'bar' (whitespace on left side of operator only)
+            "bar -='4'",
+        ]
+        result = self.render_tag(" ".join(options))
+        self.assertEqual(result, "?bar=1&bar=2&bar=3&bar=4")
+
+    def test_add_with_mixed_option_spacing_and_variable_substitution(self):
+        options = [
+            # Do not use request.GET
+            "source='?bar=5'",
+            # add '1' to 'bar' (consistant whitespace)
+            "bar_param_name += one",
+            # add '2' to 'bar' (no whitespace)
+            "bar_param_name+=two",
+            # add '3' to 'bar' (whitespace on right side of operator only)
+            "bar_param_name-= three",
+            # add '4' to 'bar' (whitespace on left side of operator only)
+            "bar_param_name -=four",
+        ]
+        result = self.render_tag(" ".join(options))
+        self.assertEqual(result, "?bar=1&bar=2&bar=3&bar=4&bar=5")
+
     def test_remove_with_strings(self):
         result = self.render_tag("bar-='1'")
         self.assertEqual(
@@ -110,6 +142,38 @@ class TestQuerystringTag(SimpleTestCase):
     def test_remove_with_param_key_and_value(self):
         result = self.render_tag("bar_param_name-=three")
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=1&bar=2&baz=single-value")
+
+    def test_remove_with_mixed_spacing(self):
+        options = [
+            # Override source
+            "source='?foo=a&foo=b&foo=c&foo=d&foo=x'",
+            # remove 'a' from 'foo' (consistant whitespace)
+            "foo -= 'a'",
+            # remove 'b' from 'foo' (no whitespace)
+            "foo-='b'",
+            # remove 'c' from 'foo' (whitespace on right side of operator only)
+            "foo-= 'c'",
+            # remove 'd' from 'foo' (whitespace on left side of operator only)
+            "foo -='d'",
+        ]
+        result = self.render_tag(" ".join(options))
+        self.assertEqual(result, "?foo=x")
+
+    def test_remove_with_mixed_spacing_and_variable_substitution(self):
+        options = [
+            # Override source
+            "source='?foo=a&foo=b&foo=c&foo=d&foo=x'",
+            # remove 'a' from 'foo' (consistant whitespace)
+            "foo_param_name -= letter_a",
+            # remove 'b' from 'foo' (no whitespace)
+            "foo_param_name-=letter_b",
+            # remove 'c' from 'foo' (whitespace on right side of operator only)
+            "foo_param_name-= letter_c",
+            # remove 'd' from 'foo' (whitespace on left side of operator only)
+            "foo_param_name -=letter_d",
+        ]
+        result = self.render_tag(" ".join(options))
+        self.assertEqual(result, "?foo=x")
 
     def test_discard_with_strings(self):
         result = self.render_tag("discard 'foo' 'bar'")
