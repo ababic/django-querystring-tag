@@ -96,16 +96,16 @@ class TestQuerystringTag(SimpleTestCase):
     def test_remove_with_strings(self):
         result = self.render_tag("bar-='1'")
         self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&foo=d&bar=3&bar=2&baz=single-value"
+            result, "?foo=a&foo=b&foo=c&foo=d&bar=2&bar=3&baz=single-value"
         )
 
     def test_remove_with_key_param(self):
         result = self.render_tag("bar_param_name-='1'")
-        self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=3&bar=2&baz=single-value")
+        self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=2&bar=3&baz=single-value")
 
     def test_remove_with_value_param(self):
         result = self.render_tag("bar-=one")
-        self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=3&bar=2&baz=single-value")
+        self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=2&bar=3&baz=single-value")
 
     def test_remove_with_param_key_and_value(self):
         result = self.render_tag("bar_param_name-=three")
