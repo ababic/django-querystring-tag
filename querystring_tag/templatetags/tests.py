@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.template import Context, Template
 from django.test import RequestFactory, SimpleTestCase
 
@@ -35,6 +36,7 @@ class TestQuerystringTag(SimpleTestCase):
             "letter_c": "c",
             "letter_d": "d",
             "letters": ["a", "b", "c", "d"],
+            "user": User(pk=1, username="username"),
         }
         return template.render(Context(context_data))
 
@@ -65,6 +67,14 @@ class TestQuerystringTag(SimpleTestCase):
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&foo=d"
         )
+
+    def test_add_new_param_with_model_object(self):
+        options = [
+            "source='?'",
+            "foo=user",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?foo=1")
 
     def test_replace_with_string(self):
         result = self.render_tag("foo='foo'")
@@ -121,6 +131,14 @@ class TestQuerystringTag(SimpleTestCase):
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&foo=d&foo=x&foo=y&foo=z"
         )
+
+    def test_add_with_model_object(self):
+        options = [
+            "source='?bar=2&bar=3",
+            "bar += user",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?bar=1&bar=2&bar=3")
 
     def test_add_with_key_and_value_variable_substitution(self):
         result = self.render_tag("foo_parm_name+=letter_d")
@@ -181,6 +199,14 @@ class TestQuerystringTag(SimpleTestCase):
         ]
         result = self.render_tag(*options)
         self.assertEqual(result, "?bar=10&bar=8&bar=9")
+
+    def test_remove_with_model_object(self):
+        options = [
+            "source='?bar=1&bar=2&bar=3",
+            "bar -= user",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?bar=2&bar=3")
 
     def test_remove_with_key_and_value_variable_substitution(self):
         result = self.render_tag("bar_param_name-=three")
