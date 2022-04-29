@@ -306,3 +306,15 @@ class TestQuerystringTag(SimpleTestCase):
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=a&newparam=new"
         )
+
+    def test_remove_blank_default(self):
+        result = self.render_tag("source_data='foo=&bar=&baz='")
+        self.assertEqual(result, "?")
+
+    def test_remove_blank_true(self):
+        result = self.render_tag("source_data='foo=&bar=&baz=' remove_blank=True")
+        self.assertEqual(result, "?")
+
+    def test_remove_blank_false(self):
+        result = self.render_tag("source_data='foo=&bar=&baz=' remove_blank=False")
+        self.assertEqual(result, "?foo=&bar=&baz=")
