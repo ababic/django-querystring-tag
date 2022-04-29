@@ -58,12 +58,6 @@ class QuerystringNode(Node):
         return QueryDict("", mutable=True)
 
     @staticmethod
-    def remove_utm_params(querydict: QueryDict) -> None:
-        for key in querydict.keys():
-            if key.lower().startswith("utm_"):
-                del querydict[key]
-
-    @staticmethod
     def clean_querydict(
         querydict: QueryDict, remove_blank: bool = True, remove_utm: bool = True
     ) -> None:
