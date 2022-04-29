@@ -49,7 +49,7 @@ class QuerystringNode(Node):
         except AttributeError:
             source_data = self.source_data
         if isinstance(source_data, QueryDict):
-            return source_data.copy(mutable=True)
+            return source_data.copy()
         if isinstance(source_data, dict):
             return QueryDict.fromkeys(source_data, mutable=True)
         if isinstance(source_data, str):
