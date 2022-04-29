@@ -1,6 +1,6 @@
 # django-querystring-tag
 
-[![PyPi version](https://badgen.net/pypi/v/pip/)](https://pypi.com/project/pip)
+[![PyPi version](https://badgen.net/pypi/v/django-querystring-tag/)](https://pypi.com/project/django-querystring-tag)
 [![Test](https://github.com/ababic/django-querystring-tag/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/ababic/django-querystring-tag/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/ababic/django-querystring-tag/branch/master/graph/badge.svg?token=LDR7W1G2XC)](https://codecov.io/gh/ababic/django-querystring-tag)
 
