@@ -3,7 +3,9 @@ from typing import Any, Union
 from django.db.models import Model
 
 
-def normalize_value(value: Any, model_value_field: Union[None, str] = None) -> Union[str, None]:
+def normalize_value(
+    value: Any, model_value_field: Union[None, str] = None
+) -> Union[str, None]:
     if value is None:
         return None
     if isinstance(value, str):

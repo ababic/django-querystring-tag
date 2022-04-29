@@ -64,9 +64,7 @@ class TestQuerystringTag(SimpleTestCase):
             "foo=letters",
         ]
         result = self.render_tag(*options)
-        self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&foo=d"
-        )
+        self.assertEqual(result, "?foo=a&foo=b&foo=c&foo=d")
 
     def test_add_new_param_with_model_object(self):
         options = [
@@ -98,7 +96,7 @@ class TestQuerystringTag(SimpleTestCase):
             "foo=letters",
         ]
         result = self.render_tag(*options)
-        self.assertEqual(result, '?foo=a&foo=b&foo=c&foo=d')
+        self.assertEqual(result, "?foo=a&foo=b&foo=c&foo=d")
 
     def test_add_with_string(self):
         result = self.render_tag("foo+='d'")
@@ -124,9 +122,7 @@ class TestQuerystringTag(SimpleTestCase):
             "foo += letters",
         ]
         result = self.render_tag(*options)
-        self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&foo=d&foo=x&foo=y&foo=z"
-        )
+        self.assertEqual(result, "?foo=a&foo=b&foo=c&foo=d&foo=x&foo=y&foo=z")
 
     def test_add_with_model_object(self):
         options = [
@@ -176,9 +172,7 @@ class TestQuerystringTag(SimpleTestCase):
 
     def test_remove_with_string(self):
         result = self.render_tag("bar-='1'")
-        self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&bar=2&bar=3&baz=single-value"
-        )
+        self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=2&bar=3&baz=single-value")
 
     def test_remove_with_key_variable_substitution(self):
         result = self.render_tag("bar_param_name-='1'")
@@ -191,7 +185,7 @@ class TestQuerystringTag(SimpleTestCase):
     def test_remove_with_value_list(self):
         options = [
             "source_data='bar=1&bar=2&bar=3&bar=8&bar=9&bar=10'",
-            "bar -= numbers"
+            "bar -= numbers",
         ]
         result = self.render_tag(*options)
         self.assertEqual(result, "?bar=10&bar=8&bar=9")
