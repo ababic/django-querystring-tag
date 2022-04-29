@@ -18,7 +18,7 @@ class QuerystringNode(Node):
         param_modifiers: Optional[List["ParamModifierExpression"]] = None,
         remove_blank: Union[bool, FilterExpression] = True,
         remove_utm: Union[bool, FilterExpression] = True,
-        target_var: Optional[str] = None,
+        target_variable_name: Optional[str] = None,
     ):
         self.source_data = source_data
         # parameters for the 'only' or 'discard' options
@@ -30,7 +30,7 @@ class QuerystringNode(Node):
         self.remove_blank = remove_blank
         self.remove_utm = remove_utm
         # Set when 'as' is used to variabalize the value
-        self.target_var = target_var
+        self.target_variable_name = target_variable_name
 
     def get_resolved_arguments(self, context):
         only = [var.resolve(context) for var in self.only]
@@ -120,7 +120,7 @@ class QuerystringNode(Node):
 
     def render(self, context):
         output = self.get_querystring(context)
-        if self.target_var is not None:
-            context[self.target_var] = output
+        if self.target_variable_name is not None:
+            context[self.target_variable_name] = output
             return ""
         return output
