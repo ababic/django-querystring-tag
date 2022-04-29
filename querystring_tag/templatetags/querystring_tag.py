@@ -38,7 +38,8 @@ def normalize_bits(bits: List[str]) -> List[str]:
             return_value.append(bit)
             continue
 
-        if match := KWARG_PATTERN.match(bit):
+        match = KWARG_PATTERN.match(bit)
+        if match:
             return_value.extend(
                 [match.group("key"), match.group("operator"), match.group("value")]
             )
