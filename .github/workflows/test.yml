@@ -1,9 +1,7 @@
-name: "Test Python"
+name: "Test"
 
 on:
-  push:
-    paths-ignore:
-    - 'docs/**'
+  push
 
 # Our test suite should cover:
 # - Compatibility with the most recent versions of Python and Django

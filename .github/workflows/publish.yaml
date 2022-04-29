@@ -1,4 +1,4 @@
-name: "Deploy"
+name: "Publish"
 
 on:
   release:
@@ -21,11 +21,7 @@ jobs:
       - name: ⬇️ Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "Django>=3.2,<3.3"
-          pip install "Wagtail>=2.14,<2.15"
           pip install -e .[test]
-      - name: ✅ Check for missing migrations
-        run: django-admin makemigrations --check --noinput
       - name: 🧪 Run tests
         run: pytest
       - name: ⬇️ Install build dependencies
