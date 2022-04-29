@@ -60,58 +60,39 @@ class ParamModifierExpression:
         Sets the 'self.param_name' attribute value from
         `self.param_name_expression`.
         """
-        expression = self.param_name_expression
-        if not expression:
-            self.param_name = None
+        expr = self.param_name_expression
+        if not expr:
             return
 
-        try:
-            resolved = expression.resolve(context)
-        except VariableDoesNotExist:
-            if ignore_failures:
-                resolved = None
-            raise
-
-        self.param_name = resolved or expression.token.strip("'").strip('"')
+        self.param_name = expr.resolve(context, ignore_failures) or expr.token
 
     def resolve_value(self, context, ignore_failures: bool = False) -> None:
         """
         Sets the `self.value` attribute value from `self.value_expression`.
+        If not `None`, the value is normalized to a list of strings to match
+        the value format of `QueryDict`.
         """
-        expression = self.value_expression
-        if not expression:
+        expr = self.value_expression
+        if not expr:
             return
 
-        # If the token looks like a quoted string, return with quotes removed
-        stripped = expression.token.strip("'").strip('"')
-        if len(expression.token) - len(stripped) == 2:
-            value = stripped
-        else:
-            try:
-                value = expression.resolve(context)
-            except VariableDoesNotExist:
-                if "." not in expression.token and "|" not in expression.token:
-                    value = expression.token
-                if ignore_failures:
-                    return
-                raise
+        resolved = expr.resolve(context, ignore_failures)
 
         # Normalize resolved value to a lists of strings
-        if hasattr(value, "__iter__") and not isinstance(value, (str, bytes)):
-            self.value = [normalize_value(v, self.model_value_field) for v in value]
+        if hasattr(resolved, "__iter__") and not isinstance(resolved, (str, bytes)):
+            self.value = [normalize_value(v, self.model_value_field) for v in resolved]
         else:
-            self.value = [normalize_value(value, self.model_value_field)]
+            self.value = [normalize_value(resolved, self.model_value_field)]
 
     def resolve_model_value_field(self, context, ignore_failures: bool = False) -> None:
         """
         Sets the `self.model_value_field` attribute value from
         `self.model_value_field_expression`.
         """
-        expression = self.model_value_field_expression
-        if not expression:
+        expr = self.model_value_field_expression
+        if not expr:
             return
-
-        self.model_value_field = expression.resolve(context, ignore_failures)
+        self.model_value_field = expr.resolve(context, ignore_failures)
 
     def apply(self, querydict: QueryDict) -> None:
         """
