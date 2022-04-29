@@ -1,6 +1,7 @@
 from typing import Optional
 
 from django.contrib.auth.models import User
+from django.http.request import QueryDict
 from django.template import Context, Template, TemplateSyntaxError
 from django.test import RequestFactory, SimpleTestCase
 
@@ -42,6 +43,8 @@ class TestQuerystringTag(SimpleTestCase):
             "letter_d": "d",
             "letters": ["a", "b", "c", "d"],
             "user": User(pk=1, username="user-one"),
+            "querydict": QueryDict("foo=1&foo=2&bar=baz", mutable=True),
+            "dictionary": {"foo": ["1", "2"], "bar": "baz"},
         }
         return template.render(Context(context_data))
 
@@ -323,6 +326,14 @@ class TestQuerystringTag(SimpleTestCase):
     def test_using_as_without_target_name_results_in_error(self):
         with self.assertRaises(TemplateSyntaxError):
             self.render_tag("only 'foo' as")
+
+    def test_with_querydict_source_data(self):
+        result = self.render_tag("foo+=3 bar=None source_data=querydict")
+        self.assertEqual(result, "?foo=1&foo=2&foo=3")
+
+    def test_with_dictionary_source_data(self):
+        result = self.render_tag("foo+=3 bar=None source_data=dictionary")
+        self.assertEqual(result, "?foo=1&foo=2&foo=3")
 
     def test_remove_blank_default(self):
         result = self.render_tag("source_data='foo=&bar=&baz='")
