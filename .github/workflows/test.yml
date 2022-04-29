@@ -33,6 +33,10 @@ jobs:
           pip install "Django>=4.0,<5.0"
       - name: 🧪 Run tests
         run: pytest --junitxml=junit/test-results.xml --cov=querystring_tag
+      - name: 📊 Upload coverage report
+        uses: codecov/codecov-action@v1
+        with:
+          name: Python 3.9
 
   test-legacy:
     name: Test with older dependencies
