@@ -192,3 +192,24 @@ And you wanted to preserve everything except for `group` `published_after` in th
 ```
 
 NOTE: `discard` is compatible with every other option except for `only`. It can even be combined with any number of modifying keyword arguments; Just remember to keep the `discard` keyword and related field names as the left-most parameters.
+
+## Testing the code locally
+
+If you have a recent version of Python 3 installed, you can use a simple virtualenv to run tests locally. After cloning the repository, navigate to the project's root directory on your machine, then run the following:
+
+### To create the virtualenv
+
+```console
+$ virtualenv venv
+$ source venv/bin/activate
+$ pip install -e '.[test]' -U
+$ deactivate
+```
+
+### To run tests
+
+```console
+$ source venv/bin/activate
+$ pytest
+$ deactivate
+```
