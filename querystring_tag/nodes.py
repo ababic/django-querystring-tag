@@ -4,6 +4,8 @@ from django.http.request import QueryDict
 from django.template.base import FilterExpression, Node
 from django.utils.safestring import mark_safe
 
+from querystring_tag.utils import normalize_value
+
 if TYPE_CHECKING:
     from .expressions import ParamModifierExpression
 
@@ -51,7 +53,13 @@ class QuerystringNode(Node):
         if isinstance(source_data, QueryDict):
             return source_data.copy()
         if isinstance(source_data, dict):
-            return QueryDict.fromkeys(source_data, mutable=True)
+            source = QueryDict("", mutable=True)
+            for key, value in source_data.items():
+                if hasattr(value, "__iter__") and not isinstance(value, (str, bytes)):
+                    source.setlist(key, (normalize_value(v) for v in value))
+                else:
+                    source.setlist(key, [normalize_value(value)])
+            return source
         if isinstance(source_data, str):
             return QueryDict(source_data, mutable=True)
         # TODO: Fail more loudly when source_data value not supported
