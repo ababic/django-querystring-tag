@@ -36,7 +36,7 @@ class TestQuerystringTag(SimpleTestCase):
             "letter_c": "c",
             "letter_d": "d",
             "letters": ["a", "b", "c", "d"],
-            "user": User(pk=1, username="username"),
+            "user": User(pk=1, username="user-one"),
         }
         return template.render(Context(context_data))
 
@@ -73,6 +73,15 @@ class TestQuerystringTag(SimpleTestCase):
         ]
         result = self.render_tag(*options)
         self.assertEqual(result, "?foo=1")
+
+    def test_add_new_param_with_model_value_field(self):
+        options = [
+            "source_data=''",
+            "foo=user",
+            "model_value_field='username'",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?foo=user-one")
 
     def test_replace_with_string(self):
         result = self.render_tag("foo='foo'")
@@ -127,10 +136,19 @@ class TestQuerystringTag(SimpleTestCase):
     def test_add_with_model_object(self):
         options = [
             "source_data='bar=2&bar=3'",
-            "bar += user",
+            "bar+=user",
         ]
         result = self.render_tag(*options)
         self.assertEqual(result, "?bar=1&bar=2&bar=3")
+
+    def test_add_with_model_value_field(self):
+        options = [
+            "source_data='bar=1&bar=2'",
+            "bar+=user",
+            "model_value_field='username'",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?bar=1&bar=2&bar=user-one")
 
     def test_add_with_key_and_value_variable_substitution(self):
         result = self.render_tag("foo_param_name+=letter_d")
@@ -192,11 +210,20 @@ class TestQuerystringTag(SimpleTestCase):
 
     def test_remove_with_model_object(self):
         options = [
-            "source_data='bar=1&bar=2&bar=3'",
-            "bar -= user",
+            "source_data='foo=1&foo=2'",
+            "foo-=user",
         ]
         result = self.render_tag(*options)
-        self.assertEqual(result, "?bar=2&bar=3")
+        self.assertEqual(result, "?foo=2")
+
+    def test_remove_with_model_value_field(self):
+        options = [
+            "source_data='foo=user-one&foo=user-two'",
+            "foo-=user",
+            "model_value_field='username'",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?foo=user-two")
 
     def test_remove_with_key_and_value_variable_substitution(self):
         result = self.render_tag("bar_param_name-=three")
