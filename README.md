@@ -1,5 +1,9 @@
 # django-querystring-tag
 
+[![PyPi version](https://badgen.net/pypi/v/pip/)](https://pypi.com/project/pip)
+[![Test](https://github.com/ababic/django-querystring-tag/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/ababic/django-querystring-tag/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/ababic/django-querystring-tag/branch/master/graph/badge.svg?token=LDR7W1G2XC)](https://codecov.io/gh/ababic/django-querystring-tag)
+
 This tiny package adds the `{% querystring %}` tag: A powerful, well tested template tag for modifying and rendering safe, suitably-encoded querystring values.
 
 It's the clean and simple way to create pagination links, filters and other state-preserving links, without cluttering up your view code!
