@@ -9,7 +9,7 @@ It's the simple way to create pagination links, filters, and other state-preserv
 1. Install this app with `pip install django-querystring-tag`
 2. Add `querystring_tag` to your `INSTALLED_APPS`
 
-## Using the `{% querystring %}` tag
+## How to use
 
 Load the tag in the templates where you want to use it, by adding the following to the template (usually at the top):
 
@@ -21,17 +21,17 @@ Load the tag in the templates where you want to use it, by adding the following 
 
 Query data can be modified 'on-the-fly', using keyword arguments to specify what you'd like to change.
 
-#### Replacing a parameter value ('=')
+#### Replacing parameter value
 
 The most common requirement is to completely replace the value for a specific parameter. This is done using a regular keyword argument, with an `=` operator between the parameter name and value. For example:
 
 ```
- {% querystring foo="bar" %}```
+{% querystring foo="bar" %}
 ```
 
-#### Removing a parameter value ('-=')
+#### Removing a parameter value
 
-When working with multi-value parameters, you may find yourself having to **remove** a specific value, leaving any other values in place.
+When working with multi-value parameters, you may find yourself having to **remove** a specific value, without affecting any other values.
 
 In these situations, you can use the `-=` operator instead of the usual `=`. For example, if the current querystring looked something like this:
 
@@ -42,14 +42,14 @@ In these situations, you can use the `-=` operator instead of the usual `=`. For
 And you wanted to remove `&bar=2`, your querystring tag might look like this:
 
 ```
-{% querystring bar-=2 %}```
+{% querystring bar-=2 %}
 ```
 
-The `{% querystring %}` tag gracefully handles cases where the specified value is already not present.
+If the specified value isn't present, the instruction will simply be ignored.
 
-#### Adding to a parameter value ('+=')
+#### Adding to a parameter value
 
-When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, leaving any other values in place.
+When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, without affecting any other values.
 
 In these situations, you can use the `+=` operator instead of the usual `=`. For example, if the current querystring looked something like this:
 
@@ -63,7 +63,7 @@ And you wanted to add `&bar=4`, your querystring tag might look like this:
 {% querystring bar+=4 %}```
 ```
 
-The `{% querystring %}` tag gracefully handles cases where the value is already present for the specified parameter, or where no values are present for the parameter at all.
+If the specified value is already present, the instruction will simply be ignored.
 
 #### Template variable support
 
@@ -77,7 +77,16 @@ Unlike a lot of custom template tags, `{% querystring %}` supports the use of te
 
 Values can be strings, booleans, integers, dates, datetimes, Django model instances, or iterables of either of these values.
 
-When encountering a Django model instance as a value, `{% querystring %}` will automatically take the `pk` value from the instance to use in the querystring.
+When encountering a Django model instance, `{% querystring %}` will automatically take the `pk` value from it, and use that to modify the querystring. To use a different field value, you can use the tag's `model_value_field` option (see further down for details). Alternatively, you can add a `querystring_value_field` attribute to your model class. For example:
+
+```python
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50, unique=True)
+
+    # use 'slug' values in querystrings
+    querystring_value_field = "slug"
+```
 
 #### Specifying multiple values
 
@@ -95,8 +104,6 @@ The output of the above would be:
 ```
 "?tags=tag1&amp;tags=tag2&amp;tags=tag3"
 ```
-
-(Plus whatever other values were in the source data.
 
 ## Options reference
 
