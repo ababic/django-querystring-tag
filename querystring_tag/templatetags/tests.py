@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Optional
 
 from django.contrib.auth.models import User
@@ -37,6 +38,7 @@ class TestQuerystringTag(SimpleTestCase):
             "three": 3,
             "four": 4,
             "numbers": [1, 2, 3, 4],
+            "start_of_year": date(2022, 1, 1),
             "letter_a": "a",
             "letter_b": "b",
             "letter_c": "c",
@@ -133,6 +135,14 @@ class TestQuerystringTag(SimpleTestCase):
             result, "?foo=a&foo=b&foo=c&foo=d&bar=1&bar=2&bar=3&baz=single-value"
         )
 
+    def test_add_with_date(self):
+        options = [
+            "source_data='foo=bar'",
+            "foo+=start_of_year",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?foo=2022-01-01&foo=bar")
+
     def test_add_with_value_list(self):
         options = [
             "source_data='foo=x&foo=y&foo=z'",
@@ -215,6 +225,14 @@ class TestQuerystringTag(SimpleTestCase):
         ]
         result = self.render_tag(*options)
         self.assertEqual(result, "?bar=10&bar=8&bar=9")
+
+    def test_remove_with_date(self):
+        options = [
+            "source_data='foo=bar&foo=2022-01-01'",
+            "foo-=start_of_year",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?foo=bar")
 
     def test_remove_with_model_object(self):
         options = [
