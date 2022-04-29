@@ -25,6 +25,15 @@ class ParamModifierExpression:
 
     operator = None
 
+    __slots__ = (
+        "param_name_expression",
+        "value_expression",
+        "model_value_field_expression",
+        "param_name",
+        "value",
+        "model_value_field",
+    )
+
     def __init__(
         self,
         param_name: FilterExpression,
