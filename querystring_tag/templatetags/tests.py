@@ -318,3 +318,23 @@ class TestQuerystringTag(SimpleTestCase):
     def test_remove_blank_false(self):
         result = self.render_tag("source_data='foo=&bar=&baz=' remove_blank=False")
         self.assertEqual(result, "?foo=&bar=&baz=")
+
+    def test_remove_utm_default(self):
+        result = self.render_tag(
+            "source_data='foo=bar&utm_source=email&utm_content=cta&utm_campaign=Test'"
+        )
+        self.assertEqual(result, "?foo=bar")
+
+    def test_remove_utm_true(self):
+        result = self.render_tag(
+            "source_data='foo=bar&utm_source=email&utm_content=cta&utm_campaign=Test' remove_utm=True"
+        )
+        self.assertEqual(result, "?foo=bar")
+
+    def test_remove_utm_false(self):
+        result = self.render_tag(
+            "source_data='foo=bar&utm_source=email&utm_content=cta&utm_campaign=Test' remove_utm=False"
+        )
+        self.assertEqual(
+            result, "?foo=bar&utm_source=email&utm_content=cta&utm_campaign=Test"
+        )
