@@ -1,5 +1,7 @@
+from typing import Optional
+
 from django.contrib.auth.models import User
-from django.template import Context, Template
+from django.template import Context, Template, TemplateSyntaxError
 from django.test import RequestFactory, SimpleTestCase
 
 
@@ -12,9 +14,12 @@ class TestQuerystringTag(SimpleTestCase):
         cls.request_factory = RequestFactory()
 
     @classmethod
-    def render_tag(cls, *options: str) -> str:
+    def render_tag(cls, *options: str, add_to_template: Optional[str] = None) -> str:
         tag_options = " ".join(options)
-        template = Template("{% querystring " + tag_options + " %}")
+        template_string = "{% querystring " + tag_options + " %}"
+        if add_to_template:
+            template_string += add_to_template
+        template = Template(template_string)
 
         request = cls.request_factory.get(
             "/", data={"foo": ["a", "b", "c"], "bar": [1, 2, 3], "baz": "single-value"}
@@ -306,6 +311,18 @@ class TestQuerystringTag(SimpleTestCase):
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=a&newparam=new"
         )
+
+    def test_using_as_renders_nothing(self):
+        result = self.render_tag("only 'foo' as qs")
+        self.assertEqual(result, "")
+
+    def test_using_as_adds_variable_to_context(self):
+        result = self.render_tag("only 'foo' as qs", add_to_template="{{ qs }}")
+        self.assertEqual(result, "?foo=a&foo=b&foo=c")
+
+    def test_using_as_without_target_name_results_in_error(self):
+        with self.assertRaises(TemplateSyntaxError):
+            self.render_tag("only 'foo' as")
 
     def test_remove_blank_default(self):
         result = self.render_tag("source_data='foo=&bar=&baz='")
