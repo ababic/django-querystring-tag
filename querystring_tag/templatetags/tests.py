@@ -265,6 +265,16 @@ class TestQuerystringTag(SimpleTestCase):
         result = self.render_tag("discard 'foo' 'bar'")
         self.assertEqual(result, "?baz=single-value")
 
+    def test_discard_with_not_present_params(self):
+        options = [
+            "discard",
+            "'x'",
+            "'y'",
+            "source_data='foo=bar'",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?foo=bar")
+
     def test_discard_with_params(self):
         result = self.render_tag("discard foo_param_name bar_param_name")
         self.assertEqual(result, "?baz=single-value")
@@ -276,6 +286,16 @@ class TestQuerystringTag(SimpleTestCase):
     def test_only_with_strings(self):
         result = self.render_tag("only 'foo' 'bar'")
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3")
+
+    def test_only_with_not_present_params(self):
+        options = [
+            "only",
+            "'x'",
+            "'y'",
+            "source_data='foo=bar'",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?")
 
     def test_only_with_params(self):
         result = self.render_tag("only foo_param_name bar_param_name")
