@@ -32,7 +32,7 @@ Load the tag in the templates where you want to use it, by adding the following 
 {% load querystring_tag %}
 ```
 
-### Set or replace a parameter value
+### Set or replace parameter values
 
 The most common requirement is to completely replace the value for a specific parameter. This is done using a regular keyword argument, with an `=` operator between the parameter name and value. For example:
 
@@ -40,7 +40,7 @@ The most common requirement is to completely replace the value for a specific pa
 {% querystring foo="bar" %}
 ```
 
-### Remove a parameter value
+### Remove a single parameter value
 
 When working with multi-value parameters, you may find yourself having to **remove** a specific value, without affecting any other values.
 
@@ -58,7 +58,7 @@ And you wanted to remove `&bar=2`, your querystring tag might look like this:
 
 If the specified value isn't present, the instruction will simply be ignored.
 
-### Add a parameter value
+### Add a signle parameter value
 
 When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, without affecting any other values.
 
