@@ -39,9 +39,9 @@ class ParamModifierExpression:
         self.model_value_field = None
 
     def resolve(self, context, ignore_failures: bool = False) -> None:
+        self.resolve_model_value_field(context, ignore_failures)
         self.resolve_param_name(context, ignore_failures)
         self.resolve_value(context, ignore_failures)
-        self.resolve_model_value_field(context, ignore_failures)
 
     def resolve_param_name(self, context, ignore_failures: bool = False) -> None:
         """
