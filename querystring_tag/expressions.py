@@ -88,7 +88,7 @@ class ParamModifierExpression:
         if hasattr(value, "__iter__") and not isinstance(value, (str, bytes)):
             self.value = [normalize_value(v, self.model_value_field) for v in value]
         else:
-            self.value = [normalize_value(value)]
+            self.value = [normalize_value(value, self.model_value_field)]
 
     def resolve_model_value_field(self, context, ignore_failures: bool = False) -> None:
         """
