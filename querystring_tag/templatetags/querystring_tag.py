@@ -17,6 +17,7 @@ KWARG_PATTERN = re.compile(
     r"(?P<key>[^-+=\s]+)\s*(?P<operator>\-=|\+=|=)\s*(?P<value>\S+)"
 )
 
+
 def normalize_bits(bits: List[str]) -> List[str]:
     """
     Further splits the list of strings returned by `token.split_contents()`
@@ -74,7 +75,7 @@ def extract_param_names(parser, bits: List[str]) -> List[FilterExpression]:
             return param_names
 
         try:
-            next_bit = bits[i+1]
+            next_bit = bits[i + 1]
             if next_bit in Operator.values:
                 # param names have been exhausted
                 return param_names
@@ -157,7 +158,7 @@ def querystring(parser, token):
 
     # the remaining bits should be keyword arguments, so we group them
     # into (key, operator, value) tuples
-    model_value_field = "pk"
+    model_value_field = None
     param_modifier_groups = []
     for group in extract_kwarg_groups(parser, bits):
         # variabalize known option values
@@ -178,7 +179,9 @@ def querystring(parser, token):
     for group in param_modifier_groups:
         expression_class = PARAM_MODIFIER_EXPRESSIONS.get(group[1])
         param_modifiers.append(
-            expression_class(param_name=group[0], value=group[2], model_value_field=model_value_field)
+            expression_class(
+                param_name=group[0], value=group[2], model_value_field=model_value_field
+            )
         )
 
     return QuerystringNode(
