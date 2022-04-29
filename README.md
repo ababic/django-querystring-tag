@@ -1,13 +1,28 @@
 # django-querystring-tag
 
-Adds the `{% querystring %}` tag for you to use in Django templates: A single, powerful template tag for modifying and including safe, suitably-encoded querystring values in links.
+This tiny package adds the `{% querystring %}` tag: A powerful, well tested template tag for modifying and rendering safe, suitably-encoded querystring values.
 
-It's the simple way to create pagination links, filters, and other state-preserving links, without cluttering up your views.
+It's the clean and simple way to create pagination links, filters and other state-preserving links, without cluttering up your view code!
 
 ## Installation
 
-1. Install this app with `pip install django-querystring-tag`
-2. Add `querystring_tag` to your `INSTALLED_APPS`
+1.  Install the package from pypi:
+
+    **With Poetry**
+
+    ```console
+    $ poetry add django-querystring-tag
+    ```
+
+    **With pip**
+
+    ```console
+    $ pip install django-querystring-tag
+    ```
+
+2.  Add `"querystring_tag"` to the `INSTALLED_APPS` list in your Django project settings.
+
+3.  Optional: To use the `{% querystring %}` tag freely, without having to `{% load %}` it into templates, add `"querystring_tag.templatetags.querystring_tag"` to the `['OPTIONS']['builtins']` list for your chosen template backend. [See an example](https://github.com/ababic/django-querystring-tag/blob/master/querystring_tag/testapp/settings.py#L36).
 
 ## How to use
 
