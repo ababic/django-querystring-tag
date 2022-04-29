@@ -41,10 +41,13 @@ class ParamModifierExpression:
         model_value_field: Union[FilterExpression, None],
     ):
         self.param_name_expression = param_name
-        self.param_name = None
         self.value_expression = value
-        self.values = None
         self.model_value_field_expression = model_value_field
+
+        # The following will be updated when resolve()
+        # is called for the above FilterExpression objects
+        self.param_name = None
+        self.value = None
         self.model_value_field = None
 
     def resolve(self, context, ignore_failures: bool = False) -> None:
