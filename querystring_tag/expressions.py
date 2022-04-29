@@ -96,10 +96,8 @@ class ParamModifierExpression:
 
     def apply(self, querydict: QueryDict) -> None:
         """
-        Uses the following resolved attribute values to modify the supplied QueryDict:
-        * `self.param_name`
-        * `self.value`
-        * `self.model_value_field`
+        Uses the resolved `self.param_name` and `self.value` values
+        to modify the supplied QueryDict.
         """
         raise NotImplementedError
 
