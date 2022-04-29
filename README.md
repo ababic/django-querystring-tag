@@ -32,11 +32,7 @@ Load the tag in the templates where you want to use it, by adding the following 
 {% load querystring_tag %}
 ```
 
-### Modifying the data
-
-Query data can be modified 'on-the-fly', using keyword arguments to specify what you'd like to change.
-
-#### Replacing parameter value
+### Set or replace a parameter value
 
 The most common requirement is to completely replace the value for a specific parameter. This is done using a regular keyword argument, with an `=` operator between the parameter name and value. For example:
 
@@ -44,7 +40,7 @@ The most common requirement is to completely replace the value for a specific pa
 {% querystring foo="bar" %}
 ```
 
-#### Removing a parameter value
+### Remove a parameter value
 
 When working with multi-value parameters, you may find yourself having to **remove** a specific value, without affecting any other values.
 
@@ -62,7 +58,7 @@ And you wanted to remove `&bar=2`, your querystring tag might look like this:
 
 If the specified value isn't present, the instruction will simply be ignored.
 
-#### Adding to a parameter value
+### Add a parameter value
 
 When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, without affecting any other values.
 
@@ -80,7 +76,7 @@ And you wanted to add `&bar=4`, your querystring tag might look like this:
 
 If the specified value is already present, the instruction will simply be ignored.
 
-#### Template variable support
+### Use template variables anywhere!
 
 Unlike a lot of custom template tags, `{% querystring %}` supports the use of template variables in keys as well as values. For example, if the tag was being used to generate pagination links, and ``page_param_name`` and ``page_num`` were variables available in the template, you could use them both like so:
 
@@ -88,7 +84,7 @@ Unlike a lot of custom template tags, `{% querystring %}` supports the use of te
 {% querystring page_param_name=page_num %}
 ```
 
-#### Supported value types
+### Supported value types
 
 Values can be strings, booleans, integers, dates, datetimes, Django model instances, or iterables of either of these values.
 
@@ -103,7 +99,7 @@ class Category(models.Model):
     querystring_value_field = "slug"
 ```
 
-#### Specifying multiple values
+### Specifying multiple values
 
 As mentioned above, you can provide an iterable as a value to specify multiple values for a parameter at once. That could be a native Python type, such as a `list`, `tuple` or `set`, but could also be anything that implements the `__iter__` method to support iteration, for example, a `QuerySet`.
 
@@ -120,7 +116,7 @@ The output of the above would be:
 "?tags=tag1&amp;tags=tag2&amp;tags=tag3"
 ```
 
-## Options reference
+### Options reference
 
 #### `source_data`
 
