@@ -62,7 +62,7 @@ And you wanted to remove `&bar=2`, your querystring tag might look like this:
 
 If the specified value isn't present, the instruction will simply be ignored.
 
-### Add a signle parameter value
+### Add a single parameter value
 
 When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, without affecting any other values.
 
