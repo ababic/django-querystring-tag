@@ -57,29 +57,21 @@ def normalize_bits(bits: List[str]) -> List[str]:
     return return_value
 
 
-def extract_param_names(parser, bits: List[str]) -> List[FilterExpression]:
+def extract_param_names(parser, bits: List[str]) -> Iterable[FilterExpression]:
     """
-    Return a list of ``FilterExpression`` objects that represent the
-    'param name' values following the 'only' or 'remove' opening keyword.
+    Return ``FilterExpression`` objects that represent the 'parameter names'
+    that following the opening 'only' or 'remove' keywords.
     """
-    param_names = []
     for i, bit in enumerate(bits):
-
-        if bit == "as" or bit in QueryParamOperator.values:
-            # param names have been exhausted
-            return param_names
-
         try:
             next_bit = bits[i + 1]
             if next_bit in QueryParamOperator.values:
-                # param names have been exhausted
-                return param_names
+                # param names are exhausted
+                break
         except IndexError:
             pass
 
-        param_names.append(parser.compile_filter(bit))
-
-    return param_names
+        yield parser.compile_filter(bit)
 
 
 def extract_kwarg_groups(
@@ -90,17 +82,22 @@ def extract_kwarg_groups(
     triples used by developers in a {% querystring %} tag.
     """
     current_group = []
-    for bit in bits:
-        if bit == "as":
-            if current_group:
-                yield tuple(current_group)
-            break
+    for i, bit in enumerate(bits):
+        try:
+            next_bit = bits[i + 1]
+            if next_bit in QueryParamOperator.values:
+                # this bit should be a new 'param name', so return
+                # the current group and start a new one
+                if current_group:
+                    yield tuple(current_group)
+                current_group.clear()
+        except IndexError:
+            pass
+
         if bit in QueryParamOperator.values:
-            key = current_group.pop()
-            if current_group:
-                yield tuple(current_group)
-            current_group = [key, bit]
+            current_group.append(bit)
         else:
             current_group.append(parser.compile_filter(bit))
+
     if current_group:
         yield tuple(current_group)
