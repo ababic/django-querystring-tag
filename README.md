@@ -36,6 +36,12 @@ Load the tag in the templates where you want to use it, by adding the following 
 {% load querystring_tag %}
 ```
 
+You can then use the tag like this:
+
+```
+{% querystring paramter_one='value' parameter_two+='add-to-existing' parameter_three-="remove-from-existing" %}
+```
+
 ### The basics
 
 1. The tag uses `request.GET` as the data source by default. Check out the [`source_data`](#source_data) option if you have other ideas.
