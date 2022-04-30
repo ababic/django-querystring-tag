@@ -21,13 +21,12 @@ class TestQuerystringTag(SimpleTestCase):
         *options: str,
         source: Union[str, Dict[str, Any], QueryDict] = None,
         add_to_template: Optional[str] = None,
+        include_request_in_context: Optional[bool] = True,
     ) -> str:
         request = cls.request_factory.get(
             "/", data={"foo": ["a", "b", "c"], "bar": [1, 2, 3], "baz": "single-value"}
         )
-
         context_data = {
-            "request": request,
             "foo_param_name": "foo",
             "bar_param_name": "bar",
             "baz_param_name": "baz",
@@ -47,6 +46,8 @@ class TestQuerystringTag(SimpleTestCase):
             "querydict": QueryDict("foo=1&foo=2&bar=baz", mutable=True),
             "dictionary": {"foo": ["1", "2"], "bar": "baz"},
         }
+        if include_request_in_context:
+            context_data["request"] = request
 
         tag_options = " ".join(options)
         if source is not None:
@@ -60,7 +61,17 @@ class TestQuerystringTag(SimpleTestCase):
 
         return template.render(Context(context_data))
 
-    def test_add_param_with_string(self):
+    def test_uses_request_get_as_data_source_by_defaul(self):
+        result = self.render_tag()
+        self.assertEqual(
+            result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value"
+        )
+
+    def test_creates_blank_data_source_if_request_is_unavailable(self):
+        result = self.render_tag(include_request_in_context=False)
+        self.assertEqual(result, "?")
+
+    def test_add_new_param_with_string(self):
         result = self.render_tag("newparam='new'")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=new"
