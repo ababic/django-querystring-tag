@@ -93,6 +93,15 @@ class TestQuerystringTag(SimpleTestCase):
         result = self.render_tag(*options)
         self.assertEqual(result, "?foo=user-one")
 
+    def test_add_new_param_with_non_existent_model_value_field_falls_back_to_pk(self):
+        options = [
+            "source_data=''",
+            "foo=user",
+            "model_value_field='secret_key'",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?foo=1")
+
     def test_replace_with_string(self):
         result = self.render_tag("foo='foo'")
         self.assertEqual(result, "?foo=foo&bar=1&bar=2&bar=3&baz=single-value")
@@ -157,11 +166,11 @@ class TestQuerystringTag(SimpleTestCase):
 
     def test_add_with_model_object(self):
         options = [
-            "source_data='bar=2&bar=3'",
+            "source_data='bar=2'",
             "bar+=user",
         ]
         result = self.render_tag(*options)
-        self.assertEqual(result, "?bar=1&bar=2&bar=3")
+        self.assertEqual(result, "?bar=1&bar=2")
 
     def test_add_with_model_value_field(self):
         options = [
@@ -171,6 +180,15 @@ class TestQuerystringTag(SimpleTestCase):
         ]
         result = self.render_tag(*options)
         self.assertEqual(result, "?bar=1&bar=2&bar=user-one")
+
+    def test_add_with_non_existent_model_value_field_falls_back_to_pk(self):
+        options = [
+            "source_data='bar=2'",
+            "bar+=user",
+            "model_value_field='secret_key'",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?bar=1&bar=2")
 
     def test_add_with_key_and_value_variable_substitution(self):
         result = self.render_tag("foo_param_name+=letter_d")
@@ -254,6 +272,15 @@ class TestQuerystringTag(SimpleTestCase):
         ]
         result = self.render_tag(*options)
         self.assertEqual(result, "?foo=user-two")
+
+    def test_remove_with_non_existent_model_value_field_falls_back_to_pk(self):
+        options = [
+            "source_data='foo=1&foo=2'",
+            "foo-=user",
+            "model_value_field='secret_key'",
+        ]
+        result = self.render_tag(*options)
+        self.assertEqual(result, "?foo=2")
 
     def test_remove_with_key_and_value_variable_substitution(self):
         result = self.render_tag("bar_param_name-=three")
