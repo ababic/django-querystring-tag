@@ -71,8 +71,10 @@ class ParamModifierExpression:
             return
 
         resolved = expr.resolve(context, ignore_failures)
+        if resolved is None:
+            return
 
-        # Normalize resolved value to a lists of strings
+        # Normalize non-null values to a lists of strings
         if hasattr(resolved, "__iter__") and not isinstance(resolved, (str, bytes)):
             self.value = [normalize_value(v, self.model_value_field) for v in resolved]
         else:
