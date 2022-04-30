@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 
 from django.contrib.auth.models import User
 from django.http.request import QueryDict
@@ -16,19 +16,17 @@ class TestQuerystringTag(SimpleTestCase):
         cls.request_factory = RequestFactory()
 
     @classmethod
-    def render_tag(cls, *options: str, add_to_template: Optional[str] = None) -> str:
-        tag_options = " ".join(options)
-        template_string = "{% querystring " + tag_options + " %}"
-        if add_to_template:
-            template_string += add_to_template
-        template = Template(template_string)
-
+    def render_tag(
+        cls,
+        *options: str,
+        source: Union[str, Dict[str, Any], QueryDict] = None,
+        add_to_template: Optional[str] = None,
+        include_request_in_context: Optional[bool] = True,
+    ) -> str:
         request = cls.request_factory.get(
             "/", data={"foo": ["a", "b", "c"], "bar": [1, 2, 3], "baz": "single-value"}
         )
-
         context_data = {
-            "request": request,
             "foo_param_name": "foo",
             "bar_param_name": "bar",
             "baz_param_name": "baz",
@@ -48,50 +46,76 @@ class TestQuerystringTag(SimpleTestCase):
             "querydict": QueryDict("foo=1&foo=2&bar=baz", mutable=True),
             "dictionary": {"foo": ["1", "2"], "bar": "baz"},
         }
+        if include_request_in_context:
+            context_data["request"] = request
+
+        tag_options = " ".join(options)
+        if source is not None:
+            context_data["source"] = source
+            tag_options += " source_data=source"
+
+        template_string = "{% querystring " + tag_options + " %}"
+        if add_to_template:
+            template_string += add_to_template
+        template = Template(template_string)
+
         return template.render(Context(context_data))
 
-    def test_add_param_with_string(self):
+    def test_uses_request_get_as_data_source_by_defaul(self):
+        result = self.render_tag()
+        self.assertEqual(
+            result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value"
+        )
+
+    def test_creates_blank_data_source_if_request_is_unavailable(self):
+        result = self.render_tag(include_request_in_context=False)
+        self.assertEqual(result, "?")
+
+    def test_add_new_param_with_string(self):
         result = self.render_tag("newparam='new'")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=new"
         )
 
-    def test_add_param_with_key_variable_substitution(self):
+    def test_add_new_param_with_key_variable_substitution(self):
         result = self.render_tag("new_param_name='new'")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=new"
         )
 
-    def test_add_param_with_value_variable_substitution(self):
+    def test_add_new_param_with_value_variable_substitution(self):
         result = self.render_tag("newparam=two")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=2"
         )
 
     def test_add_new_param_with_value_list(self):
-        options = [
-            "source_data=''",
-            "foo=letters",
-        ]
-        result = self.render_tag(*options)
+        source = ""
+        result = self.render_tag("foo=letters", source=source)
         self.assertEqual(result, "?foo=a&foo=b&foo=c&foo=d")
 
     def test_add_new_param_with_model_object(self):
-        options = [
-            "source_data=''",
-            "foo=user",
-        ]
-        result = self.render_tag(*options)
+        source = ""
+        result = self.render_tag("foo=user", source=source)
         self.assertEqual(result, "?foo=1")
 
     def test_add_new_param_with_model_value_field(self):
+        source = ""
         options = [
-            "source_data=''",
             "foo=user",
             "model_value_field='username'",
         ]
-        result = self.render_tag(*options)
+        result = self.render_tag(*options, source=source)
         self.assertEqual(result, "?foo=user-one")
+
+    def test_add_new_param_with_non_existent_model_value_field_falls_back_to_pk(self):
+        source = ""
+        options = [
+            "foo=user",
+            "model_value_field='secret_key'",
+        ]
+        result = self.render_tag(*options, source=source)
+        self.assertEqual(result, "?foo=1")
 
     def test_replace_with_string(self):
         result = self.render_tag("foo='foo'")
@@ -110,12 +134,13 @@ class TestQuerystringTag(SimpleTestCase):
         self.assertEqual(result, "?foo=1&bar=1&bar=2&bar=3&baz=single-value")
 
     def test_replace_with_value_list(self):
-        options = [
-            "source_data='foo=bar'",
-            "foo=letters",
-        ]
-        result = self.render_tag(*options)
+        source = "foo=bar"
+        result = self.render_tag("foo=letters", source=source)
         self.assertEqual(result, "?foo=a&foo=b&foo=c&foo=d")
+
+    def test_replace_with_none_removes_parameter(self):
+        result = self.render_tag("foo=None bar=None")
+        self.assertEqual(result, "?baz=single-value")
 
     def test_add_with_string(self):
         result = self.render_tag("foo+='d'")
@@ -136,37 +161,37 @@ class TestQuerystringTag(SimpleTestCase):
         )
 
     def test_add_with_date(self):
-        options = [
-            "source_data='foo=bar'",
-            "foo+=start_of_year",
-        ]
-        result = self.render_tag(*options)
+        source = "foo=bar"
+        result = self.render_tag("foo+=start_of_year", source=source)
         self.assertEqual(result, "?foo=2022-01-01&foo=bar")
 
     def test_add_with_value_list(self):
-        options = [
-            "source_data='foo=x&foo=y&foo=z'",
-            "foo += letters",
-        ]
-        result = self.render_tag(*options)
+        source = dict(foo=["x", "y", "z"])
+        result = self.render_tag("foo+=letters", source=source)
         self.assertEqual(result, "?foo=a&foo=b&foo=c&foo=d&foo=x&foo=y&foo=z")
 
     def test_add_with_model_object(self):
-        options = [
-            "source_data='bar=2&bar=3'",
-            "bar+=user",
-        ]
-        result = self.render_tag(*options)
-        self.assertEqual(result, "?bar=1&bar=2&bar=3")
+        source = "bar=2"
+        result = self.render_tag("bar+=user", source=source)
+        self.assertEqual(result, "?bar=1&bar=2")
 
     def test_add_with_model_value_field(self):
+        source = "foo=user-two"
         options = [
-            "source_data='bar=1&bar=2'",
-            "bar+=user",
+            "foo+=user",
             "model_value_field='username'",
         ]
-        result = self.render_tag(*options)
-        self.assertEqual(result, "?bar=1&bar=2&bar=user-one")
+        result = self.render_tag(*options, source=source)
+        self.assertEqual(result, "?foo=user-one&foo=user-two")
+
+    def test_add_with_non_existent_model_value_field_falls_back_to_pk(self):
+        source = "foo=2"
+        options = [
+            "foo+=user",
+            "model_value_field='secret_key'",
+        ]
+        result = self.render_tag(*options, source=source)
+        self.assertEqual(result, "?foo=1&foo=2")
 
     def test_add_with_key_and_value_variable_substitution(self):
         result = self.render_tag("foo_param_name+=letter_d")
@@ -175,9 +200,8 @@ class TestQuerystringTag(SimpleTestCase):
         )
 
     def test_add_with_mixed_option_spacing(self):
+        source = ""
         options = [
-            # Do not use request.GET
-            "source_data=''",
             # add '1' to 'bar' (consistant whitespace)
             "bar += 1",
             # add '2' to 'bar' (no whitespace)
@@ -187,13 +211,12 @@ class TestQuerystringTag(SimpleTestCase):
             # add '4' to 'bar' (whitespace on left side of operator only)
             "bar +='4'",
         ]
-        result = self.render_tag(*options)
+        result = self.render_tag(*options, source=source)
         self.assertEqual(result, "?bar=1&bar=2&bar=3&bar=4")
 
     def test_add_with_mixed_option_spacing_and_variable_substitution(self):
+        source = "bar=5"
         options = [
-            # Do not use request.GET
-            "source_data='bar=5'",
             # add '1' to 'bar' (consistant whitespace)
             "bar_param_name += one",
             # add '2' to 'bar' (no whitespace)
@@ -203,7 +226,7 @@ class TestQuerystringTag(SimpleTestCase):
             # add '4' to 'bar' (whitespace on left side of operator only)
             "bar_param_name +=four",
         ]
-        result = self.render_tag(*options)
+        result = self.render_tag(*options, source=source)
         self.assertEqual(result, "?bar=1&bar=2&bar=3&bar=4&bar=5")
 
     def test_remove_with_string(self):
@@ -219,46 +242,45 @@ class TestQuerystringTag(SimpleTestCase):
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=2&bar=3&baz=single-value")
 
     def test_remove_with_value_list(self):
-        options = [
-            "source_data='bar=1&bar=2&bar=3&bar=8&bar=9&bar=10'",
-            "bar -= numbers",
-        ]
-        result = self.render_tag(*options)
+        source = dict(bar=[1, 2, 3, 8, 9, 10])
+        result = self.render_tag("bar-=numbers", source=source)
         self.assertEqual(result, "?bar=10&bar=8&bar=9")
 
     def test_remove_with_date(self):
-        options = [
-            "source_data='foo=bar&foo=2022-01-01'",
-            "foo-=start_of_year",
-        ]
-        result = self.render_tag(*options)
+        source = dict(foo=["bar", "2022-01-01"])
+        result = self.render_tag("foo-=start_of_year", source=source)
         self.assertEqual(result, "?foo=bar")
 
     def test_remove_with_model_object(self):
-        options = [
-            "source_data='foo=1&foo=2'",
-            "foo-=user",
-        ]
-        result = self.render_tag(*options)
+        source = dict(foo=[1, 2])
+        result = self.render_tag("foo-=user", source=source)
         self.assertEqual(result, "?foo=2")
 
     def test_remove_with_model_value_field(self):
+        source = {"foo": ["user-one", "user-two"]}
         options = [
-            "source_data='foo=user-one&foo=user-two'",
             "foo-=user",
             "model_value_field='username'",
         ]
-        result = self.render_tag(*options)
+        result = self.render_tag(*options, source=source)
         self.assertEqual(result, "?foo=user-two")
+
+    def test_remove_with_non_existent_model_value_field_falls_back_to_pk(self):
+        source = {"foo": [1, 2]}
+        options = [
+            "foo-=user",
+            "model_value_field='secret_key'",
+        ]
+        result = self.render_tag(*options, source=source)
+        self.assertEqual(result, "?foo=2")
 
     def test_remove_with_key_and_value_variable_substitution(self):
         result = self.render_tag("bar_param_name-=three")
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=1&bar=2&baz=single-value")
 
     def test_remove_with_mixed_spacing(self):
+        source = {"foo": ["a", "b", "c", "d", "x"]}
         options = [
-            # Override source
-            "source_data='foo=a&foo=b&foo=c&foo=d&foo=x'",
             # remove 'a' from 'foo' (consistant whitespace)
             "foo -= 'a'",
             # remove 'b' from 'foo' (no whitespace)
@@ -268,13 +290,12 @@ class TestQuerystringTag(SimpleTestCase):
             # remove 'd' from 'foo' (whitespace on left side of operator only)
             "foo -='d'",
         ]
-        result = self.render_tag(*options)
+        result = self.render_tag(*options, source=source)
         self.assertEqual(result, "?foo=x")
 
     def test_remove_with_mixed_spacing_and_variable_substitution(self):
+        source = {"foo": ["a", "b", "c", "d", "x"]}
         options = [
-            # Override source
-            "source_data='foo=a&foo=b&foo=c&foo=d&foo=x'",
             # remove 'a' from 'foo' (consistant whitespace)
             "foo_param_name -= letter_a",
             # remove 'b' from 'foo' (no whitespace)
@@ -284,7 +305,7 @@ class TestQuerystringTag(SimpleTestCase):
             # remove 'd' from 'foo' (whitespace on left side of operator only)
             "foo_param_name -=letter_d",
         ]
-        result = self.render_tag(*options)
+        result = self.render_tag(*options, source=source)
         self.assertEqual(result, "?foo=x")
 
     def test_discard_with_strings(self):
@@ -292,13 +313,13 @@ class TestQuerystringTag(SimpleTestCase):
         self.assertEqual(result, "?baz=single-value")
 
     def test_discard_with_not_present_params(self):
+        source = "foo=bar"
         options = [
             "discard",
             "'x'",
             "'y'",
-            "source_data='foo=bar'",
         ]
-        result = self.render_tag(*options)
+        result = self.render_tag(*options, source=source)
         self.assertEqual(result, "?foo=bar")
 
     def test_discard_with_params(self):
@@ -314,13 +335,13 @@ class TestQuerystringTag(SimpleTestCase):
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3")
 
     def test_only_with_not_present_params(self):
+        source = "foo=bar"
         options = [
             "only",
             "'x'",
             "'y'",
-            "source_data='foo=bar'",
         ]
-        result = self.render_tag(*options)
+        result = self.render_tag(*options, source=source)
         self.assertEqual(result, "?")
 
     def test_only_with_params(self):
@@ -345,42 +366,50 @@ class TestQuerystringTag(SimpleTestCase):
         with self.assertRaises(TemplateSyntaxError):
             self.render_tag("only 'foo' as")
 
-    def test_with_querydict_source_data(self):
-        result = self.render_tag("foo+=3 bar=None source_data=querydict")
+    def test_with_querydict_source(self):
+        source = QueryDict("foo=1&foo=2&bar=baz", mutable=True)
+        result = self.render_tag("foo+=3 bar=None", source=source)
         self.assertEqual(result, "?foo=1&foo=2&foo=3")
 
-    def test_with_dictionary_source_data(self):
-        result = self.render_tag("foo+=3 bar=None source_data=dictionary")
-        self.assertEqual(result, "?foo=1&foo=2&foo=3")
+    def test_with_unsuitable_source(self):
+        source = ["lists", "are", "not", "supported"]
+        result = self.render_tag("foo=1", source=source)
+        self.assertEqual(result, "?foo=1")
 
     def test_remove_blank_default(self):
-        result = self.render_tag("source_data='foo=&bar=&baz='")
-        self.assertEqual(result, "?")
+        source = {"foo": "", "bar": "", "baz": "not-empty"}
+        result = self.render_tag(source=source)
+        self.assertEqual(result, "?baz=not-empty")
 
     def test_remove_blank_true(self):
-        result = self.render_tag("source_data='foo=&bar=&baz=' remove_blank=True")
-        self.assertEqual(result, "?")
+        source = {"foo": "", "bar": "", "baz": "not-empty"}
+        result = self.render_tag("remove_blank=True", source=source)
+        self.assertEqual(result, "?baz=not-empty")
 
     def test_remove_blank_false(self):
-        result = self.render_tag("source_data='foo=&bar=&baz=' remove_blank=False")
-        self.assertEqual(result, "?foo=&bar=&baz=")
+        source = {"foo": "", "bar": "", "baz": "not-empty"}
+        result = self.render_tag("remove_blank=False", source=source)
+        self.assertEqual(result, "?foo=&bar=&baz=not-empty")
 
     def test_remove_utm_default(self):
-        result = self.render_tag(
-            "source_data='foo=bar&utm_source=email&utm_content=cta&utm_campaign=Test'"
+        source = dict(
+            foo="bar", utm_source="email", utm_content="cta", utm_campaign="Test"
         )
+        result = self.render_tag(source=source)
         self.assertEqual(result, "?foo=bar")
 
     def test_remove_utm_true(self):
-        result = self.render_tag(
-            "source_data='foo=bar&utm_source=email&utm_content=cta&utm_campaign=Test' remove_utm=True"
+        source = dict(
+            foo="bar", utm_source="email", utm_content="cta", utm_campaign="Test"
         )
+        result = self.render_tag("remove_utm=True", source=source)
         self.assertEqual(result, "?foo=bar")
 
     def test_remove_utm_false(self):
-        result = self.render_tag(
-            "source_data='foo=bar&utm_source=email&utm_content=cta&utm_campaign=Test' remove_utm=False"
+        source = dict(
+            foo="bar", utm_source="email", utm_content="cta", utm_campaign="Test"
         )
+        result = self.render_tag("remove_utm=False", source=source)
         self.assertEqual(
             result, "?foo=bar&utm_source=email&utm_content=cta&utm_campaign=Test"
         )
