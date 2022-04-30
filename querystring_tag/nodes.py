@@ -20,6 +20,7 @@ class QuerystringNode(Node):
         only: Optional[List[FilterExpression]] = None,
         discard: Optional[List[FilterExpression]] = None,
         param_modifiers: Optional[List["ParamModifierExpression"]] = None,
+        model_value_field: Optional[FilterExpression] = None,
         remove_blank: Union[bool, FilterExpression] = True,
         remove_utm: Union[bool, FilterExpression] = True,
         target_variable_name: Optional[str] = None,
@@ -33,6 +34,7 @@ class QuerystringNode(Node):
         # other options
         self.remove_blank = remove_blank
         self.remove_utm = remove_utm
+        self.model_value_field = model_value_field
         # Set when 'as' is used to variabalize the value
         self.target_variable_name = target_variable_name
 
@@ -138,9 +140,16 @@ class QuerystringNode(Node):
             return source_data.copy()
         if isinstance(source_data, dict):
             source = QueryDict("", mutable=True)
+            if hasattr(self.model_value_field, "resolve"):
+                model_value_field = self.model_value_field.resolve(context)
+            else:
+                model_value_field = None
             for key, value in source_data.items():
                 if hasattr(value, "__iter__") and not isinstance(value, (str, bytes)):
-                    source.setlist(key, (normalize_value(v) for v in value))
+                    source.setlist(
+                        key,
+                        (normalize_value(v, model_value_field) for v in value),
+                    )
                 else:
                     source.setlist(key, [normalize_value(value)])
             return source
