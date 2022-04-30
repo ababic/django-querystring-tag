@@ -117,6 +117,10 @@ class TestQuerystringTag(SimpleTestCase):
         result = self.render_tag(*options)
         self.assertEqual(result, "?foo=a&foo=b&foo=c&foo=d")
 
+    def test_replace_with_none_removes_parameter(self):
+        result = self.render_tag("foo=None bar=None")
+        self.assertEqual(result, "?baz=single-value")
+
     def test_add_with_string(self):
         result = self.render_tag("foo+='d'")
         self.assertEqual(
