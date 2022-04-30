@@ -82,17 +82,22 @@ def extract_kwarg_groups(
     triples used by developers in a {% querystring %} tag.
     """
     current_group = []
-    for bit in bits:
-        if bit == "as":
-            if current_group:
-                yield tuple(current_group)
-            break
+    for i, bit in enumerate(bits):
+        try:
+            next_bit = bits[i + 1]
+            if next_bit in QueryParamOperator.values:
+                # this bit should be a new 'param name', so return
+                # the current group and start a new one
+                if current_group:
+                    yield tuple(current_group)
+                current_group.clear()
+        except IndexError:
+            pass
+
         if bit in QueryParamOperator.values:
-            key = current_group.pop()
-            if current_group:
-                yield tuple(current_group)
-            current_group = [key, bit]
+            current_group.append(bit)
         else:
             current_group.append(parser.compile_filter(bit))
+
     if current_group:
         yield tuple(current_group)
