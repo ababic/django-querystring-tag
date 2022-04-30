@@ -55,9 +55,6 @@ class ParamModifierExpression:
         `self.param_name_expression`.
         """
         expr = self.param_name_expression
-        if not expr:
-            return
-
         self.param_name = expr.resolve(context, ignore_failures) or expr.token
 
     def resolve_value(self, context, ignore_failures: bool = False) -> None:
@@ -67,9 +64,6 @@ class ParamModifierExpression:
         the value format of `QueryDict`.
         """
         expr = self.value_expression
-        if not expr:
-            return
-
         resolved = expr.resolve(context, ignore_failures)
         if resolved is None:
             return
