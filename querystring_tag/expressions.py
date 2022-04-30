@@ -1,16 +1,10 @@
 from typing import Union
 
-from django.db.models import TextChoices
 from django.http.request import QueryDict
 from django.template.base import FilterExpression, VariableDoesNotExist
 
+from .constants import QueryParamOperator
 from .utils import normalize_value
-
-
-class Operator(TextChoices):
-    ADD = "+=", "add"
-    REMOVE = "-=", "remove"
-    SET = "=", "set"
 
 
 class ParamModifierExpression:
@@ -103,7 +97,7 @@ class ParamModifierExpression:
 
 
 class SetValueExpression(ParamModifierExpression):
-    operator = Operator.SET
+    operator = QueryParamOperator.SET
 
     def apply(self, querydict: QueryDict) -> None:
         if self.value is None:
@@ -116,7 +110,7 @@ class SetValueExpression(ParamModifierExpression):
 
 
 class AddValueExpression(ParamModifierExpression):
-    operator = Operator.ADD
+    operator = QueryParamOperator.ADD
 
     def apply(self, querydict: QueryDict) -> None:
         current_values = set(querydict.getlist(self.param_name, ()))
@@ -126,7 +120,7 @@ class AddValueExpression(ParamModifierExpression):
 
 
 class RemoveValueExpression(ParamModifierExpression):
-    operator = Operator.REMOVE
+    operator = QueryParamOperator.REMOVE
 
     def apply(self, querydict: QueryDict) -> None:
         current_values = set(querydict.getlist(self.param_name, ()))
