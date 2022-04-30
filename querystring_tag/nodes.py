@@ -79,7 +79,7 @@ class QuerystringNode(Node):
         # if the 'only' or 'discard' options are used, identify all of the
         # 'parameter name' arguments that follow it, and remove them from `bits`
         if bits[0] in ("only", "discard"):
-            params = extract_param_names(parser, bits[1:])
+            params = tuple(extract_param_names(parser, bits[1:]))
             if bits[0] == "only":
                 kwargs["only"] = params
             else:
