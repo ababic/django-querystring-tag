@@ -39,7 +39,7 @@ Load the tag in the templates where you want to use it, by adding the following 
 You can then use the tag like this:
 
 ```
-{% querystring paramter_one='value' parameter_two+='add-to-existing' parameter_three-="remove-from-existing" %}
+{% querystring param_one='value' param_two+='add-to-existing' param_three-="remove-from-existing" %}
 ```
 
 ### The basics
