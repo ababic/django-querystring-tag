@@ -36,7 +36,15 @@ Load the tag in the templates where you want to use it, by adding the following 
 {% load querystring_tag %}
 ```
 
-### Set or replace parameter values
+### The basics
+
+1. The tag uses `request.GET` as the data source by default. Check out the [`source_data`](#source_data) option if you have other ideas.
+2. The examples below are deliberately simple: You can make as many modifications in the same tag as you need. GO CRAZY!
+3. You don't want to preserve Google tracking parameters in links, do you? I thought not. Any parameters starting with `utm_` are removed by default. See the [`remove_utm`](#remove_utm) option if you would rather keep them.
+4. You're probably not interested in preserving blank parameters in links either, are you? See, I read your mind! Blank values removed by default too. See the [`remove_blank`](#remove_blank) option if you would rather keep them.
+5. Want to variabalize the return value instead of rendering it? Go ahead any try the 'as' option. It works just as you would expect.
+
+### Setting or replacing a parameter value
 
 The most common requirement is to completely replace the value for a specific parameter. This is done using a regular keyword argument, with an `=` operator between the parameter name and value. For example:
 
@@ -44,9 +52,9 @@ The most common requirement is to completely replace the value for a specific pa
 {% querystring foo="bar" %}
 ```
 
-### Remove a single parameter value
+### Removing a single parameter value
 
-When working with multi-value parameters, you may find yourself having to **remove** a specific value, without affecting any other values.
+When working with multi-value parameters, you may find yourself having to **remove** a specific value, without affecting any of the others.
 
 In these situations, you can use the `-=` operator instead of the usual `=`. For example, if the current querystring looked something like this:
 
@@ -62,9 +70,9 @@ And you wanted to remove `&bar=2`, your querystring tag might look like this:
 
 If the specified value isn't present, the instruction will simply be ignored.
 
-### Add a single parameter value
+### Adding a single parameter value
 
-When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, without affecting any other values.
+When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, without affecting any of the others.
 
 In these situations, you can use the `+=` operator instead of the usual `=`. For example, if the current querystring looked something like this:
 
