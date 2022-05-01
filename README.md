@@ -125,7 +125,7 @@ You can combine `only` with any number of modifications too. Just be sure to kee
 {% querystring only 'q' group="group_value" clear_session="true" %}
 ```
 
-### Use `discard` to specify parameters you want to exclude
+### Use `discard` to specify parameters you want to lose
 
 Use `discard` at the start of your `{% querystring %}` tag when you want to exclude specific parameters from the querystring.
 
