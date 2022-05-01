@@ -28,31 +28,6 @@ def querystring(parser, token):
 
 
 class QuerystringNode(Node):
-    def __init__(
-        self,
-        *,
-        source_data: Optional[Union[str, Dict[str, Any], QueryDict]] = None,
-        only: Optional[List[FilterExpression]] = None,
-        discard: Optional[List[FilterExpression]] = None,
-        param_modifiers: Optional[List[ParamModifierExpression]] = None,
-        model_value_field: Optional[FilterExpression] = None,
-        remove_blank: Union[bool, FilterExpression] = True,
-        remove_utm: Union[bool, FilterExpression] = True,
-        target_variable_name: Optional[str] = None,
-    ):
-        self.source_data = source_data
-        # parameters for the 'only' or 'discard' options
-        self.only = only or ()
-        self.discard = discard or ()
-        # modifiers
-        self.param_modifiers = param_modifiers or ()
-        # other options
-        self.remove_blank = remove_blank
-        self.remove_utm = remove_utm
-        self.model_value_field = model_value_field
-        # Set when 'as' is used to variabalize the value
-        self.target_variable_name = target_variable_name
-
     @classmethod
     def from_bits(cls, bits: List[str], parser) -> "QuerystringNode":
         kwargs = cls.init_kwargs_from_bits(bits, parser)
@@ -125,6 +100,31 @@ class QuerystringNode(Node):
         kwargs["param_modifiers"] = param_modifiers
 
         return kwargs
+
+    def __init__(
+        self,
+        *,
+        source_data: Optional[Union[str, Dict[str, Any], QueryDict]] = None,
+        only: Optional[List[FilterExpression]] = None,
+        discard: Optional[List[FilterExpression]] = None,
+        param_modifiers: Optional[List[ParamModifierExpression]] = None,
+        model_value_field: Optional[FilterExpression] = None,
+        remove_blank: Union[bool, FilterExpression] = True,
+        remove_utm: Union[bool, FilterExpression] = True,
+        target_variable_name: Optional[str] = None,
+    ):
+        self.source_data = source_data
+        # parameters for the 'only' or 'discard' options
+        self.only = only or ()
+        self.discard = discard or ()
+        # modifiers
+        self.param_modifiers = param_modifiers or ()
+        # other options
+        self.remove_blank = remove_blank
+        self.remove_utm = remove_utm
+        self.model_value_field = model_value_field
+        # Set when 'as' is used to variabalize the value
+        self.target_variable_name = target_variable_name
 
     def get_resolved_arguments(self, context):
         only = [var.resolve(context) for var in self.only]
