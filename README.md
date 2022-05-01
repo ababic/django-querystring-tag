@@ -96,7 +96,7 @@ In these situations, you can use the `+=` operator instead of the usual `=`. For
 And you wanted to add `&bar=4`, your querystring tag might look like this:
 
 ```
-{% querystring bar+=4 %}```
+{% querystring bar+=4 %}
 ```
 
 If the specified value is already present, the instruction will simply be ignored.
@@ -210,7 +210,6 @@ The tag defaults to using ``request.GET`` as the data source for the querystring
 For example, say you were using a Django form to validate query data, and only want valid data to be included. You could use the Form's `cleaned_data` to generate a querystring instead:
 
 ```
-{% load querystring_tag %}
 {% querystring source_data=form.cleaned_data page=2 %}
 ```
 
