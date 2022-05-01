@@ -18,18 +18,18 @@ def querystring(parser, token):
     """
     The {% querystring %} template tag. The responsibility of this function is
     really just to parse the options values, and pass things on to
-    `QuerystringNode.from_bits()` , which does all of the heavy lifting.
+    `QuerystringTagNode.from_bits()` , which does all of the heavy lifting.
     """
 
     # break token into individual key, operator and value strings
     bits = normalize_bits(token.split_contents())
 
-    return QuerystringNode.from_bits(bits, parser)
+    return QuerystringTagNode.from_bits(bits, parser)
 
 
-class QuerystringNode(Node):
+class QuerystringTagNode(Node):
     @classmethod
-    def from_bits(cls, bits: List[str], parser) -> "QuerystringNode":
+    def from_bits(cls, bits: List[str], parser) -> "QuerystringTagNode":
         kwargs = cls.init_kwargs_from_bits(bits, parser)
         return cls(**kwargs)
 
