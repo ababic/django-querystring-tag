@@ -26,13 +26,13 @@ It's the clean and simple way to create pagination links, filters and other stat
 
 2.  Add `"querystring_tag"` to the `INSTALLED_APPS` list in your Django project settings.
 
-### Optional: Add querystring_tag to builtins
+### Add querystring_tag to builtins (optional)
 
 To use the `{% querystring %}` tag freely, without having to add `{% load querystring_tag %}` to all of your templates, you can add `"querystring_tag.templatetags.querystring_tag"` to the `['OPTIONS']['builtins']` list for your chosen template backend. [Here's an example](https://github.com/ababic/django-querystring-tag/blob/master/querystring_tag/testapp/settings.py#L36).
 
 ## How to use
 
-Load the tag in the templates where you want to use it, by adding the following to the template (usually at the top):
+First, load the tag into the template you want to use it in:
 
 ```
 {% load querystring_tag %}
