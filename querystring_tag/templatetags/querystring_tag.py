@@ -30,11 +30,21 @@ def querystring(parser, token):
 class QuerystringTagNode(Node):
     @classmethod
     def from_bits(cls, bits: List[str], parser) -> "QuerystringTagNode":
+        """
+        Returns a ``QuerystringTagNode`` instance, initialised from
+        the `bits` extracted from a specific usage of {% querystring %}
+        in a template.
+        """
         kwargs = cls.init_kwargs_from_bits(bits, parser)
         return cls(**kwargs)
 
     @classmethod
     def init_kwargs_from_bits(cls, bits: List[str], parser) -> dict:
+        """
+        Converts the `bits` extracted from a specific usage of {% querystring %}
+        into a dict of keyword arguments that can be used to to create a
+        ``QuerystringTagNode`` instance.
+        """
         kwargs = {}
 
         # drop the initial "querystring" bit
