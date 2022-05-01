@@ -138,7 +138,6 @@ For example, say the current querystring looked like this:
 And you wanted to preserve everything except for `group` `published_after`. You could do:
 
 ```
-{% load querystring_tag %}
 {% querystring discard 'group' 'published_after' %}
 ```
 
