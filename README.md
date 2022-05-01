@@ -1,8 +1,12 @@
 # django-querystring-tag
 
-[![PyPi version](https://badgen.net/pypi/v/django-querystring-tag/)](https://pypi.org/project/django-querystring-tag/)
-[![Test](https://github.com/ababic/django-querystring-tag/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/ababic/django-querystring-tag/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/ababic/django-querystring-tag/branch/master/graph/badge.svg?token=LDR7W1G2XC)](https://codecov.io/gh/ababic/django-querystring-tag)
+<p>
+   <a href="https://pypi.org/project/django-querystring-tag/"><img alt="PyPi version" src="https://badgen.net/pypi/v/django-querystring-tag/"></a>
+   <a href="https://github.com/ababic/django-querystring-tag/actions/workflows/test.yml"><img alt="Test workflow status" src="https://github.com/ababic/django-querystring-tag/actions/workflows/test.yml/badge.svg?branch=master"></a>
+   <a href="https://codecov.io/gh/ababic/django-querystring-tag"><img alt="Coverage status" src="https://codecov.io/gh/ababic/django-querystring-tag/branch/master/graph/badge.svg?token=LDR7W1G2XC"></a>
+   <a href="https://github.com/ababic/django-querystring-tag/blob/master/LICENSE"><img alt="License: BSD 3-Clause" src="https://img.shields.io/badge/License-BSD_3--Clause-blue.svg"></a>
+   <a href="https://github.com/psf/black" target="blank"><img alt="Code style: Black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
 
 This tiny package adds the `{% querystring %}` tag: A powerful, well tested template tag for modifying and rendering safe, suitably-encoded querystring values.
 
