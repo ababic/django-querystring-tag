@@ -46,9 +46,10 @@ You can then use the tag like this:
 
 1. The tag uses `request.GET` as the data source by default. Check out the [`source_data`](#source_data) option if you have other ideas.
 2. The examples below are deliberately simple: You can make as many modifications in the same tag as you need. GO CRAZY!
-3. You don't want to preserve Google tracking parameters in links, do you? I thought not. Any parameters starting with `utm_` are removed by default. See the [`remove_utm`](#remove_utm) option if you would rather keep them.
-4. You're probably not interested in preserving blank parameters in links either, are you? See, I read your mind! Blank values removed by default too. See the [`remove_blank`](#remove_blank) option if you would rather keep them.
-5. Want to variabalize the return value instead of rendering it? Go ahead any try the 'as' option. It works just as you would expect.
+3. You may be wondering "I want to use this in an include template, where the parameter name is dynamic. Will that work?". **Yes it will!** I know it's unusual, but you can [use tempalate variables for parameter names](#using-template-variables-for-parameter-names) too.
+4. You don't want to preserve Google tracking parameters in links, do you? I thought not. Any parameters starting with `utm_` are removed by default. See the [`remove_utm`](#remove_utm) option if you would rather keep them.
+5. You're probably not interested in preserving blank parameters in links either, are you? See, I read your mind! Blank values removed by default too. See the [`remove_blank`](#remove_blank) option if you would rather keep them.
+6. Want to variabalize the return value instead of rendering it? Go ahead any try the 'as' option. It works just as you would expect.
 
 ### Setting or replacing a parameter value
 
@@ -58,7 +59,7 @@ The most common requirement is to completely replace the value for a specific pa
 {% querystring foo="bar" %}
 ```
 
-### Removing a single parameter value
+### Removing values from a parameter value
 
 When working with multi-value parameters, you may find yourself having to **remove** a specific value, without affecting any of the others.
 
@@ -76,7 +77,7 @@ And you wanted to remove `&bar=2`, your querystring tag might look like this:
 
 If the specified value isn't present, the instruction will simply be ignored.
 
-### Adding a single parameter value
+### Adding values to a parameter value
 
 When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, without affecting any of the others.
 
@@ -94,7 +95,7 @@ And you wanted to add `&bar=4`, your querystring tag might look like this:
 
 If the specified value is already present, the instruction will simply be ignored.
 
-### Use template variables anywhere!
+### Using template variables for parameter names
 
 Unlike a lot of custom template tags, `{% querystring %}` supports the use of template variables in keys as well as values. For example, if the tag was being used to generate pagination links, and ``page_param_name`` and ``page_num`` were variables available in the template, you could use them both like so:
 
