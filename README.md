@@ -26,7 +26,9 @@ It's the clean and simple way to create pagination links, filters and other stat
 
 2.  Add `"querystring_tag"` to the `INSTALLED_APPS` list in your Django project settings.
 
-3.  Optional: To use the `{% querystring %}` tag freely, without having to `{% load %}` it into templates, add `"querystring_tag.templatetags.querystring_tag"` to the `['OPTIONS']['builtins']` list for your chosen template backend. [See an example](https://github.com/ababic/django-querystring-tag/blob/master/querystring_tag/testapp/settings.py#L36).
+### Optional: Add querystring_tag to builtins
+
+To use the `{% querystring %}` tag freely, without having to add `{% load querystring_tag %}` to all of your templates, you can add `"querystring_tag.templatetags.querystring_tag"` to the `['OPTIONS']['builtins']` list for your chosen template backend. [Here's an example](https://github.com/ababic/django-querystring-tag/blob/master/querystring_tag/testapp/settings.py#L36).
 
 ## How to use
 
@@ -51,7 +53,7 @@ You can then use the tag like this:
 5. You're probably not interested in preserving blank parameters in links either, are you? See, I read your mind! Blank values removed by default too. See the [`remove_blank`](#remove_blank) option if you would rather keep them.
 6. Want to variabalize the return value instead of rendering it? Go ahead any try the 'as' option. It works just as you would expect.
 
-### Setting or replacing a parameter value
+### Set or replace a parameter value with `=`
 
 The most common requirement is to completely replace the value for a specific parameter. This is done using a regular keyword argument, with an `=` operator between the parameter name and value. For example:
 
@@ -59,7 +61,7 @@ The most common requirement is to completely replace the value for a specific pa
 {% querystring foo="bar" %}
 ```
 
-### Removing values from a parameter value
+### Remove from a parameter value with `-=`
 
 When working with multi-value parameters, you may find yourself having to **remove** a specific value, without affecting any of the others.
 
@@ -77,7 +79,7 @@ And you wanted to remove `&bar=2`, your querystring tag might look like this:
 
 If the specified value isn't present, the instruction will simply be ignored.
 
-### Adding values to a parameter value
+### Add to a parameter value with `+=`
 
 When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, without affecting any of the others.
 
@@ -94,6 +96,63 @@ And you wanted to add `&bar=4`, your querystring tag might look like this:
 ```
 
 If the specified value is already present, the instruction will simply be ignored.
+
+### Use `only` to specify parameters you want to keep
+
+Use `only` at the start of your `{% querystring %}` tag when you want the querystring to include values for specific parameters only.
+
+For example, say the current querystring looked like this:
+
+```
+?q=keywords&group=articles&category=2&published_after=2022-01-01
+```
+
+And you only wanted to include the `q` and `group` params in a link. You could do:
+
+```
+{% querystring only 'q' 'group' %}
+```
+
+This would result in:
+
+```
+?q=keywords&group=articles
+```
+
+You can combine `only` with any number of modifications too. Just be sure to keep the `only` keyword and related parameter names as the left-most parameters, like so:
+
+```
+{% querystring only 'q' group="group_value" clear_session="true" %}
+```
+
+### Use `discard` to specify parameters you want to exclude
+
+Use `discard` at the start of your `{% querystring %}` tag when you want to exclude specific parameters from the querystring.
+
+For example, say the current querystring looked like this:
+
+```
+?q=keywords&group=articles&category=2&published_after=2022-01-01
+```
+
+And you wanted to preserve everything except for `group` `published_after`. You could do:
+
+```
+{% load querystring_tag %}
+{% querystring discard 'group' 'published_after' %}
+```
+
+This would result in:
+
+```
+?q=keywords&group=articles
+```
+
+You can combine `discard` with any number of modifications too. Just be sure to keep the `discard` keyword and related parameter names as the left-most parameters, like so:
+
+```
+{% querystring discard 'published_after' group="group_value" clear_session="true" %}
+```
 
 ### Using template variables for parameter names
 
@@ -135,9 +194,9 @@ The output of the above would be:
 "?tags=tag1&amp;tags=tag2&amp;tags=tag3"
 ```
 
-### Options reference
+## Options reference
 
-#### `source_data`
+### `source_data`
 
 **Supported value types**: `QueryDict`, `dict`, `str`
 
@@ -152,7 +211,7 @@ For example, say you were using a Django form to validate query data, and only w
 {% querystring source_data=form.cleaned_data page=2 %}
 ```
 
-#### `remove_blank`
+### `remove_blank`
 
 **Supported value types**: `bool`
 
@@ -162,7 +221,7 @@ Any parameter values with a value of `None` or `""` (an empty string) are remove
 
 To retain blank values, include `remove_blank=False` in your `{% querystring %}` tag.
 
-#### `remove_utm`
+### `remove_utm`
 
 **Supported value types**: `bool`
 
@@ -172,7 +231,7 @@ Parameter names starting with `"utm_"` (the format used for Google Analytics tra
 
 To retain these parameters instead, include `remove_utm=False` in your `{% querystring %}` tag.
 
-#### `model_value_field`
+### `model_value_field`
 
 **Supported value types**: `str`
 
@@ -185,50 +244,6 @@ For example, if the model had a `slug` field that you were using as the public-f
 ```
 {% querystring tags=tag_queryset model_field_value='slug' %}
 ```
-
-#### `only`
-
-Use this option at the start of your `{% querystring %}` tag when you only want the querystring to include values for specific parameters.
-
-For example, say the current querystring looked like this:
-
-```
-?q=keywords&group=articles&category=2&published_after=2022-01-01
-```
-
-And you wanted to render a querystring containing only the `q` and `group` params. You could use `only` to achieve this:
-
-```
-{% load querystring_tag %}
-{% querystring only 'q' 'group' %}
-```
-
-The resulting string would be:
-
-```
-?q=keywords&group=articles
-```
-
-NOTE: `only` is compatible with every other option except for `discard`. It can even be combined with any number of modifying keyword arguments; Just remember to keep the `only` keyword and related field names as the left-most parameters.
-
-#### `discard`
-
-Use this option at the start of your `{% querystring %}` tag when you want exclude specific parameter values from the querystring.
-
-For example, say the current querystring looked like this:
-
-```
-?q=keywords&group=articles&category=2&published_after=2022-01-01
-```
-
-And you wanted to preserve everything except for `group` `published_after` in the rendered querystring. You could use `discard` to achieve this:
-
-```
-{% load querystring_tag %}
-{% querystring discard 'group' 'published_after' %}
-```
-
-NOTE: `discard` is compatible with every other option except for `only`. It can even be combined with any number of modifying keyword arguments; Just remember to keep the `discard` keyword and related field names as the left-most parameters.
 
 ## Testing the code locally
 
