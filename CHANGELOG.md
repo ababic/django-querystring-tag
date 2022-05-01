@@ -4,6 +4,12 @@
 
 - TBC
 
+## 1.0.2 (2022-05-01)
+
+- Tidying of internal APIs and docstring improvements
+- README improvements
+- Improved test coverage
+
 ## 1.0.1 (2022-04-29)
 
 - Fixed issue with `dict` values not being preserved when provided as the `source_data` value.
