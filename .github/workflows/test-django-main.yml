@@ -1,0 +1,23 @@
+name: "Test against Django main"
+
+on:
+  push:
+    branches: [main, "compat/dj**"]
+  schedule:
+    # Run at 4pm every Monday, Wednesday and Friday
+    - cron: "0 16 * * 0,2,4"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: querystring_tag.testapp.settings
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+      - run: |
+          pip install -e .[test]
+          pip install git+https://github.com/django/django.git@main#egg=Django
+      - run: pytest

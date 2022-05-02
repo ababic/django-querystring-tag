@@ -4,8 +4,7 @@ on: push
 
 # Our test suite should cover:
 # - Compatibility with the most recent versions of Python and Django
-# - at least one test run for older supported version of Python and Django
-# - a test run against Django's git main branch (allowing failures)
+# - At least one test run for older supported version of Python and Django
 
 # Current configuration:
 # - python 3.9, django 4.0
@@ -69,22 +68,3 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           name: Python 3.9
-
-  test-django-main:
-    name: 🧪 Test against Django main
-    needs: test
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    env:
-      DJANGO_SETTINGS_MODULE: querystring_tag.testapp.settings
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-        with:
-          python-version: 3.9
-          cache: "pip"
-          cache-dependency-path: "**/setup.cfg"
-      - run: |
-          pip install -e .[test]
-          pip install git+https://github.com/django/django.git@main#egg=Django
-      - run: pytest
