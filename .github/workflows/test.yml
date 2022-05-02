@@ -22,7 +22,7 @@ jobs:
           python-version: 3.9
           cache: "pip"
           cache-dependency-path: "**/setup.cfg"
-      - run: pip install black flake8 isort
+      - run: pip install -e .[lint]
       - name: Run flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
