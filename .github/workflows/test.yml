@@ -43,23 +43,29 @@ jobs:
     strategy:
       matrix:
         include:
-          - python: 3.9
-            django: Django>=4.0,<5.0
+          - name: dj4
+            python-version: 3.9
+            django-version: ">=4.0,<5.0"
             latest: true
-          - python: 3.8
-            django: Django>=3.2,<4.0
-          - python: 3.7
-            django: Django>=3.1,<3.2
+          - name: dj32
+            python-version: 3.8
+            django-version: ">=3.2,<4.0"
+          - name: dj31
+            python-version: 3.7
+            django-version: ">=3.1,<3.2"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         with:
-          python-version: ${{ matrix.python }}
-          cache: "pip"
-          cache-dependency-path: "**/setup.cfg"
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.cfg') }}-${{ matrix.name }}
+          restore-keys: ${{ runner.os }}-pip-
       - run: |
           pip install -e .[test]
-          pip install "${{ matrix.django }}"
+          pip install "Django${{ matrix.django-version }}"
       - if: ${{ !matrix.latest }}
         run: pytest
       - if: ${{ matrix.latest }}
