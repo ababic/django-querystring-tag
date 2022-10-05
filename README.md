@@ -251,19 +251,22 @@ For example, if the model had a `slug` field that you were using as the public-f
 
 If you have a recent version of Python 3 installed, you can use a simple virtualenv to run tests locally. After cloning the repository, navigate to the project's root directory on your machine, then run the following:
 
-### To create the virtualenv
+### Set up the virtualenv
 
 ```console
 $ virtualenv venv
 $ source venv/bin/activate
 $ pip install -e '.[test]' -U
-$ deactivate
 ```
 
-### To run tests
+### Run tests
 
 ```console
-$ source venv/bin/activate
 $ pytest
+```
+
+### When you're done
+
+```console
 $ deactivate
 ```
