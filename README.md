@@ -59,10 +59,22 @@ You can then use the tag like this:
 
 ### Set or replace a parameter value with `=`
 
-The most common requirement is to completely replace the value for a specific parameter. This is done using a regular keyword argument, with an `=` operator between the parameter name and value. For example:
+The most common requirement is to completely replace the value for a specific parameter. This is done using a regular keyword argument, with an `=` operator between the parameter name and value. For example, if your querystring looked like this:
+
+```
+?q=test&baz=1
+```
+
+Any you wanted to add a `foo` variable with the value `bar`
 
 ```
 {% querystring foo="bar" %}
+```
+
+Which would result in the following output:
+
+```
+?q=test&baz=1&foo=bar
 ```
 
 ### Remove from a parameter value with `-=`
@@ -79,6 +91,12 @@ And you wanted to remove `&bar=2`, your querystring tag might look like this:
 
 ```
 {% querystring bar-=2 %}
+```
+
+Which would result in the following output:
+
+```
+?q=test&bar=1&bar=3
 ```
 
 If the specified value isn't present, the instruction will simply be ignored.
@@ -99,6 +117,12 @@ And you wanted to add `&bar=4`, your querystring tag might look like this:
 {% querystring bar+=4 %}
 ```
 
+Which would result in the following output:
+
+```
+?q=test&bar=1&bar=2&bar=3&bar=4
+```
+
 If the specified value is already present, the instruction will simply be ignored.
 
 ### Use `only` to specify parameters you want to keep
@@ -117,7 +141,7 @@ And you only wanted to include the `q` and `group` params in a link. You could d
 {% querystring only 'q' 'group' %}
 ```
 
-This would result in:
+Which would result in the following output:
 
 ```
 ?q=keywords&group=articles
@@ -145,7 +169,7 @@ And you wanted to preserve everything except for `group` `published_after`. You 
 {% querystring discard 'group' 'published_after' %}
 ```
 
-This would result in:
+Which would result in the following output:
 
 ```
 ?q=keywords&group=articles
