@@ -57,7 +57,7 @@ class QuerystringTagNode(Node):
         # if the "as" keyword has been used to parameterize the result,
         # capture the target variable name and remove the items from `bits`.
         if "as" in bits:
-            if bits[-2] != "as":
+            if len(bits) < 2 or bits[-2] != "as":
                 raise TemplateSyntaxError(
                     "When using the 'as' option, it must be used at the end of tag, with "
                     "a single 'variable name' value included after the 'as' keyword."
@@ -67,7 +67,7 @@ class QuerystringTagNode(Node):
 
         # if the 'only' or 'discard' options are used, identify all of the
         # 'parameter name' arguments that follow it, and remove them from `bits`
-        if bits[0] in ("only", "discard"):
+        if bits and bits[0] in ("only", "discard"):
             params = tuple(extract_param_names(parser, bits[1:]))
             if bits[0] == "only":
                 kwargs["only"] = params
