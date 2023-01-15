@@ -57,7 +57,7 @@ You can then use the tag like this:
 5. You're probably not interested in preserving blank parameters in links either, are you? See? I read your mind! Blank values are removed by default too. Add `remove_blank=False` if you would rather keep them.
 6. Want to variabalize the return value instead of rendering it? Go ahead any try the 'as' option. It works just as you would expect.
 
-### Set or replace a parameter value with `=`
+### Use `=` to set or replace a parameter 
 
 The most common requirement is to completely replace the value for a specific parameter. This is done using a regular keyword argument, with an `=` operator between the parameter name and value. For example, if your querystring looked like this:
 
@@ -77,7 +77,7 @@ Which would result in the following output:
 ?q=test&baz=1&foo=bar
 ```
 
-### Remove from a parameter value with `-=`
+### Use `-=` to remove values from a multi-value parameter 
 
 When working with multi-value parameters, you may find yourself having to **remove** a specific value, without affecting any of the others.
 
@@ -101,7 +101,7 @@ Which would result in the following output:
 
 If the specified value isn't present, the instruction will simply be ignored.
 
-### Add to a parameter value with `+=`
+### Use `+=` to add values to a multi-value parameter
 
 When working with multi-value parameters, you may find yourself having to **add** a specific value for a parameter, without affecting any of the others.
 
