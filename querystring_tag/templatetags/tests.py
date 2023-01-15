@@ -355,14 +355,26 @@ class TestQuerystringTag(SimpleTestCase):
         )
 
     def test_using_as_renders_nothing(self):
-        result = self.render_tag("only 'foo' as qs")
+        result = self.render_tag("as qs")
         self.assertEqual(result, "")
 
     def test_using_as_adds_variable_to_context(self):
+        result = self.render_tag("as qs", add_to_template="{{ qs }}")
+        self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value")
+
+    def test_using_as_without_target_name_results_in_error(self):
+        with self.assertRaises(TemplateSyntaxError):
+            self.render_tag("as")
+
+    def test_using_only_var_as_renders_nothing(self):
+        result = self.render_tag("only 'foo' as qs")
+        self.assertEqual(result, "")
+
+    def test_using_only_var_as_adds_variable_to_context(self):
         result = self.render_tag("only 'foo' as qs", add_to_template="{{ qs }}")
         self.assertEqual(result, "?foo=a&foo=b&foo=c")
 
-    def test_using_as_without_target_name_results_in_error(self):
+    def test_using_only_var_as_without_target_name_results_in_error(self):
         with self.assertRaises(TemplateSyntaxError):
             self.render_tag("only 'foo' as")
 
