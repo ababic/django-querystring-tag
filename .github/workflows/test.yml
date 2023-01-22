@@ -79,6 +79,6 @@ jobs:
       - if: ${{ matrix.latest }}
         run: pytest --junitxml=junit/test-results.xml --cov=querystring_tag
       - if: ${{ matrix.latest }}
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           name: Python 3.10
