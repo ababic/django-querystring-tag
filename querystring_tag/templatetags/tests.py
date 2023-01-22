@@ -6,6 +6,12 @@ from django.http.request import QueryDict
 from django.template import Context, Template, TemplateSyntaxError
 from django.test import RequestFactory, SimpleTestCase
 
+# This is applied as GET data for requests created by render_tag()
+REQUEST_GET = {"foo": ["a", "b", "c"], "bar": [1, 2, 3], "baz": "single-value"}
+
+# When unmodified, the above GET data should produce this querystring
+UNMODIFIED_QUERYSTRING = "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value"
+
 
 class TestQuerystringTag(SimpleTestCase):
     maxDiff = None
@@ -23,9 +29,6 @@ class TestQuerystringTag(SimpleTestCase):
         add_to_template: Optional[str] = None,
         include_request_in_context: Optional[bool] = True,
     ) -> str:
-        request = cls.request_factory.get(
-            "/", data={"foo": ["a", "b", "c"], "bar": [1, 2, 3], "baz": "single-value"}
-        )
         context_data = {
             "foo_param_name": "foo",
             "bar_param_name": "bar",
@@ -47,6 +50,7 @@ class TestQuerystringTag(SimpleTestCase):
             "dictionary": {"foo": ["1", "2"], "bar": "baz"},
         }
         if include_request_in_context:
+            request = cls.request_factory.get("/", data=REQUEST_GET)
             context_data["request"] = request
 
         tag_options = " ".join(options)
@@ -61,33 +65,47 @@ class TestQuerystringTag(SimpleTestCase):
 
         return template.render(Context(context_data))
 
-    def test_uses_request_get_as_data_source_by_defaul(self):
+    def test_uses_request_get_as_data_source_by_default(self):
         result = self.render_tag()
-        self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value"
-        )
+        self.assertEqual(result, UNMODIFIED_QUERYSTRING)
 
     def test_creates_blank_data_source_if_request_is_unavailable(self):
         result = self.render_tag(include_request_in_context=False)
         self.assertEqual(result, "?")
 
+    def test_as(self):
+        """
+        NOTE: This is a simple test with no modifications. Compatibility with
+        'discard', 'only' and general modifications is covered by:
+        - test_discard_with_modifications()
+        - test_only_with_modifications()
+        """
+        options = "as some_var"
+
+        # When 'as' is specified, the template tag alone should not render anything
+        result = self.render_tag(options)
+        self.assertEqual(result, "")
+
+        # If we render the 'as' target variable to the template, we should see
+        # the output
+        result = self.render_tag(options, add_to_template="{{ some_var }}")
+        self.assertEqual(result, UNMODIFIED_QUERYSTRING)
+
+    def test_as_requires_target_variable_name(self):
+        with self.assertRaises(TemplateSyntaxError):
+            self.render_tag("as")
+
     def test_add_new_param_with_string(self):
         result = self.render_tag("newparam='new'")
-        self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=new"
-        )
+        self.assertEqual(result, UNMODIFIED_QUERYSTRING + "&newparam=new")
 
     def test_add_new_param_with_key_variable_substitution(self):
         result = self.render_tag("new_param_name='new'")
-        self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=new"
-        )
+        self.assertEqual(result, UNMODIFIED_QUERYSTRING + "&newparam=new")
 
     def test_add_new_param_with_value_variable_substitution(self):
         result = self.render_tag("newparam=two")
-        self.assertEqual(
-            result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value&newparam=2"
-        )
+        self.assertEqual(result, UNMODIFIED_QUERYSTRING + "&newparam=2")
 
     def test_add_new_param_with_value_list(self):
         source = ""
@@ -308,75 +326,72 @@ class TestQuerystringTag(SimpleTestCase):
         result = self.render_tag(*options, source=source)
         self.assertEqual(result, "?foo=x")
 
-    def test_discard_with_strings(self):
+    def test_discard_with_string_param_names(self):
         result = self.render_tag("discard 'foo' 'bar'")
         self.assertEqual(result, "?baz=single-value")
 
-    def test_discard_with_not_present_params(self):
-        source = "foo=bar"
-        options = [
-            "discard",
-            "'x'",
-            "'y'",
-        ]
-        result = self.render_tag(*options, source=source)
-        self.assertEqual(result, "?foo=bar")
-
-    def test_discard_with_params(self):
+    def test_discard_with_variable_param_names(self):
         result = self.render_tag("discard foo_param_name bar_param_name")
         self.assertEqual(result, "?baz=single-value")
 
-    def test_discard_with_additional_changes(self):
-        result = self.render_tag("discard 'foo' 'bar' baz=letter_a newparam='new'")
-        self.assertEqual(result, "?baz=a&newparam=new")
+    def test_discard_with_missing_params(self):
+        source = "foo=bar"
+        result = self.render_tag("discard 'x' 'y'", source=source)
+        self.assertEqual(result, "?foo=bar")
 
-    def test_only_with_strings(self):
+    def test_discard_with_modifications(self):
+        options_without_as = "discard 'foo' bar_param_name baz=letter_a newparam='new'"
+        options_with_as = options_without_as + " as qs"
+        expected_querystring = "?baz=a&newparam=new"
+
+        # Without 'as', the template tag should render the expected querystring
+        self.assertEqual(self.render_tag(options_without_as), expected_querystring)
+
+        # With 'as', the template tag alone should not render anything
+        self.assertEqual(self.render_tag(options_with_as), "")
+
+        # With the 'as' target variable rendered in the template,
+        # we should see the output
+        self.assertEqual(
+            self.render_tag(options_with_as, add_to_template="{{ qs }}"),
+            expected_querystring,
+        )
+
+    def test_only_with_string_param_names(self):
         result = self.render_tag("only 'foo' 'bar'")
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3")
 
-    def test_only_with_not_present_params(self):
-        source = "foo=bar"
-        options = [
-            "only",
-            "'x'",
-            "'y'",
-        ]
-        result = self.render_tag(*options, source=source)
-        self.assertEqual(result, "?")
-
-    def test_only_with_params(self):
+    def test_only_with_variable_param_names(self):
         result = self.render_tag("only foo_param_name bar_param_name")
         self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3")
 
-    def test_only_with_additional_changes(self):
         result = self.render_tag("only 'foo' 'bar' baz=letter_a newparam='new'")
         self.assertEqual(
             result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=a&newparam=new"
         )
 
-    def test_using_as_renders_nothing(self):
-        result = self.render_tag("as qs")
-        self.assertEqual(result, "")
+    def test_only_with_missing_params(self):
+        source = "foo=bar"
+        result = self.render_tag("only 'x' 'y'", source=source)
+        self.assertEqual(result, "?")
 
-    def test_using_as_adds_variable_to_context(self):
-        result = self.render_tag("as qs", add_to_template="{{ qs }}")
-        self.assertEqual(result, "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=single-value")
+    def test_only_with_modifications(self):
+        options_without_as = "only 'foo' 'bar' baz=letter_a newparam='new'"
+        options_with_as = options_without_as + " as qs"
+        expected_result = "?foo=a&foo=b&foo=c&bar=1&bar=2&bar=3&baz=a&newparam=new"
 
-    def test_using_as_without_target_name_results_in_error(self):
-        with self.assertRaises(TemplateSyntaxError):
-            self.render_tag("as")
+        # Without 'as', the template tag should render the expected querystring
+        self.assertEqual(self.render_tag(options_without_as), expected_result)
 
-    def test_using_only_var_as_renders_nothing(self):
-        result = self.render_tag("only 'foo' as qs")
-        self.assertEqual(result, "")
+        # With 'as', the template tag alone should not render anything
+        self.assertEqual(self.render_tag(options_with_as), "")
 
-    def test_using_only_var_as_adds_variable_to_context(self):
-        result = self.render_tag("only 'foo' as qs", add_to_template="{{ qs }}")
-        self.assertEqual(result, "?foo=a&foo=b&foo=c")
-
-    def test_using_only_var_as_without_target_name_results_in_error(self):
-        with self.assertRaises(TemplateSyntaxError):
-            self.render_tag("only 'foo' as")
+        # With the 'as' target variable rendered in the template,
+        # we should see the output
+        self.assertEqual(
+            self.render_tag(options_with_as, add_to_template="{{ qs }}"),
+            expected_result,
+        )
 
     def test_with_querydict_source(self):
         source = QueryDict("foo=1&foo=2&bar=baz", mutable=True)
