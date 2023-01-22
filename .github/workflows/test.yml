@@ -38,7 +38,6 @@ jobs:
     name: 🧪 Test
     needs: lint
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.experimental }}
     env:
       DJANGO_SETTINGS_MODULE: querystring_tag.testapp.settings
     strategy:
@@ -75,6 +74,7 @@ jobs:
           pip install -e .[test]
           pip install "${{ matrix.django }}"
       - if: ${{ !matrix.latest }}
+        continue-on-error: ${{ matrix.experimental }}
         run: pytest
       - if: ${{ matrix.latest }}
         run: pytest --junitxml=junit/test-results.xml --cov=querystring_tag
