@@ -55,7 +55,7 @@ You can then use the tag like this:
 3. You may be wondering "I want to use this in an include template, where the parameter name is dynamic. Will that work?". **Yes it will!** I know it's unusual, but you can [use tempalate variables for parameter names](#using-template-variables-for-parameter-names) too.
 4. You don't want to preserve Google tracking parameters in links, do you? I thought not. Any parameters starting with `utm_` are removed by default. Add `remove_utm=False` if you would rather keep them.
 5. You're probably not interested in preserving blank parameters in links either, are you? See? I read your mind! Blank values are removed by default too. Add `remove_blank=False` if you would rather keep them.
-6. Want to variabalize the return value instead of rendering it? Go ahead any try the 'as' option. It works just as you would expect.
+6. Want to variabalize the return value instead of rendering it? Go ahead and try the 'as' option. It works just as you would expect.
 
 ### Use `=` to set or replace a parameter 
 
