@@ -55,9 +55,9 @@ You can then use the tag like this:
 3. You may be wondering "I want to use this in an include template, where the parameter name is dynamic. Will that work?". **Yes it will!** I know it's unusual, but you can [use tempalate variables for parameter names](#using-template-variables-for-parameter-names) too.
 4. You don't want to preserve Google tracking parameters in links, do you? I thought not. Any parameters starting with `utm_` are removed by default. Add `remove_utm=False` if you would rather keep them.
 5. You're probably not interested in preserving blank parameters in links either, are you? See? I read your mind! Blank values are removed by default too. Add `remove_blank=False` if you would rather keep them.
-6. Want to variabalize the return value instead of rendering it? Go ahead and try the 'as' option. It works just as you would expect.
+6. Want to variabalize the return value instead of rendering it? Go ahead and try the `as` option - It works just as you would expect.
 
-### Use `=` to set or replace a parameter 
+### Use `=` to set or replace a parameter
 
 The most common requirement is to completely replace the value for a specific parameter. This is done using a regular keyword argument, with an `=` operator between the parameter name and value. For example, if your querystring looked like this:
 
@@ -65,7 +65,7 @@ The most common requirement is to completely replace the value for a specific pa
 ?q=test&baz=1
 ```
 
-Any you wanted to add a `foo` variable with the value `bar`
+And you wanted to add a `foo` variable with the value `bar`, your querystring tag might look like this:
 
 ```
 {% querystring foo="bar" %}
@@ -77,7 +77,7 @@ Which would result in the following output:
 ?q=test&baz=1&foo=bar
 ```
 
-### Use `-=` to remove values from a multi-value parameter 
+### Use `-=` to remove values from a multi-value parameter
 
 When working with multi-value parameters, you may find yourself having to **remove** a specific value, without affecting any of the others.
 
@@ -183,7 +183,7 @@ You can combine `discard` with any number of modifications too. Just be sure to 
 
 ### Using template variables for parameter names
 
-Unlike a lot of custom template tags, `{% querystring %}` supports the use of template variables in keys as well as values. For example, if the tag was being used to generate pagination links, and ``page_param_name`` and ``page_num`` were variables available in the template, you could use them both like so:
+Unlike a lot of custom template tags, `{% querystring %}` supports the use of template variables in keys as well as values. For example, if the tag was being used to generate pagination links, and `page_param_name` and `page_num` were variables available in the template, you could use them both like so:
 
 ```
 {% querystring page_param_name=page_num %}
@@ -208,7 +208,7 @@ class Category(models.Model):
 
 As mentioned above, you can provide an iterable as a value to specify multiple values for a parameter at once. That could be a native Python type, such as a `list`, `tuple` or `set`, but could also be anything that implements the `__iter__` method to support iteration, for example, a `QuerySet`.
 
-For example, if the context contained a variable ``tag_list``, which was list of strings (```['tag1', 'tag2', 'tag3']```), you can include all
+For example, if the context contained a variable `tag_list`, which was list of strings (`['tag1', 'tag2', 'tag3']`), you can include all
 of those values by referencing the list value. For example:
 
 ```
@@ -229,7 +229,7 @@ The output of the above would be:
 
 **Default value**: `request.GET`
 
-The tag defaults to using ``request.GET`` as the data source for the querystring, but the `source_data` keyword argument can be used to specify use an alternative ``QueryDict``, ``dict`` or string value.
+The tag defaults to using `request.GET` as the data source for the querystring, but the `source_data` keyword argument can be used to specify use an alternative `QueryDict`, `dict` or string value.
 
 For example, say you were using a Django form to validate query data, and only want valid data to be included. You could use the Form's `cleaned_data` to generate a querystring instead:
 
